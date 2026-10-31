@@ -1,0 +1,6 @@
+{
+  "name": "tapimagine",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}

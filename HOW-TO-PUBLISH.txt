@@ -1,0 +1,23 @@
+TapImagine - how to put it online (about 15 minutes, on your laptop)
+
+1. Get your AI key (free to start)
+   - Go to aistudio.google.com and sign in with Google.
+   - Click "Get API key" -> "Create API key". Copy it. Keep it secret.
+   - Turn on billing in Google Cloud for real use (each image costs a little).
+
+2. Put the code on GitHub
+   - Make a free account at github.com.
+   - Click "New repository", name it tapimagine, click Create.
+   - Click "uploading an existing file" and drag in everything from this
+     folder (index.html, package.json, and the api folder). Click Commit.
+
+3. Put it online with Vercel
+   - Make a free account at vercel.com (sign in with GitHub).
+   - Click "Add New" -> "Project" -> pick tapimagine -> Import.
+   - Open "Environment Variables". Name: GEMINI_API_KEY  Value: your key.
+   - Click Deploy. You get a link like tapimagine.vercel.app.
+
+4. Test it on your phone. Share the link.
+
+To change prompts later: edit api/generate.js on GitHub. Vercel updates
+the site by itself in about a minute.

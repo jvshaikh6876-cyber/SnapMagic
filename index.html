@@ -1,0 +1,134 @@
+<title>TapImagine App Preview</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Manrope:wght@400;600;700&display=swap">
+<style>
+/* Layout: one phone-width app column, step-by-step screens with a progress strip on top */
+:root{
+  --bg:#1a1426; --panel:#251c36; --line:#3a2e52; --fg:#f4eefb; --muted:#b4a7c9;
+  --accent:#ffb238; --accent-ink:#2a1a00;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Manrope",ui-sans-serif,system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.app{max-width:440px;margin:0 auto;padding-block:20px 40px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.back{background:none;border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:6px 14px;font:600 13px var(--body);cursor:pointer}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.steps i{height:4px;border-radius:4px;background:var(--line)}
+.steps i.on{background:var(--accent)}
+.steplabel{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+h1{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.02em}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 14px;text-align:left;color:var(--fg);cursor:pointer;display:flex;flex-direction:column;gap:4px;font:inherit;min-height:92px}
+.tile b{font-family:var(--display);font-size:18px;font-weight:600}
+.tile small{color:var(--muted);font-size:12.5px}
+.tile .sw{height:6px;width:40px;border-radius:6px;margin-bottom:6px}
+.tile:hover,.tile:focus-visible{border-color:var(--accent);outline:none}
+.tile.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.drop{border:2px dashed var(--line);border-radius:18px;padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.drop img{width:120px;height:120px;object-fit:cover;border-radius:50%}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:15px;font:700 16px var(--body);cursor:pointer;width:100%}
+.btn.ghost{background:none;color:var(--fg);border:1px solid var(--line)}
+.btn:focus-visible,.back:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}
+img.result{width:100%;max-width:100%;border-radius:18px;display:block;background:var(--panel)}
+.err{background:#3a1a24;border:1px solid #7a2a3c;border-radius:14px;padding:14px;color:#ffd6de}
+a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box}
+.loading{text-align:center;padding:60px 0;color:var(--muted)}
+.spin{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;margin:0 auto 14px;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+details{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+summary{cursor:pointer;font-weight:700;font-size:13px}
+details p{font-size:13px;color:var(--muted);margin:8px 0 0}
+.note{font-size:12px;color:var(--muted);text-align:center;margin:0}
+</style>
+
+<div class="app">
+  <header>
+    <div class="logo">Tap<span>Imagine</span></div>
+    <button class="back" id="back" hidden>Back</button>
+  </header>
+  <div class="steps" id="steps"><i></i><i></i><i></i><i></i><i></i></div>
+  <main id="screen"></main>
+  <p class="note">Images are made by AI. Please only upload photos you have permission to use.</p>
+</div>
+
+<script>
+const CATS={
+ Couple:{c:["#ff5e8a","#7b2ff7"],opts:{Romantic:1,Wedding:1,Cinematic:1}},
+ Boys:{c:["#2b6cff","#00c2a8"],opts:{Stylish:1,Gym:1,Luxury:1}},
+ Girls:{c:["#ff7ac6","#ffb238"],opts:{Fashion:1,Traditional:1,Portrait:1}},
+ Professional:{c:["#3a7bd5","#9aa8bd"],opts:{Business:1,LinkedIn:1,Office:1}},
+ Lifestyle:{c:["#ffb238","#ff5e3a"],opts:{"Luxury car":1,"Travel":1,"Rich lifestyle":1}},
+ Fantasy:{c:["#7b2ff7","#00d4ff"],opts:{Anime:1,Superhero:1,Fantasy:1}},
+ Festival:{c:["#ff8a00","#e52e71"],opts:{Diwali:1,Eid:1,Christmas:1}}
+};
+const STYLES={Realistic:"Real photo look","3D Cartoon":"Like an animated movie","Painting":"Oil painting look","Anime":"Japanese anime look"};
+const st={step:0,cat:null,opt:null,photo:null,style:null};
+const $=id=>document.getElementById(id);
+function tile(title,sub,sel,cols){return `<button class="tile${sel?' sel':''}" data-v="${title}">${cols?`<span class="sw" style="background:linear-gradient(90deg,${cols[0]},${cols[1]})"></span>`:''}<b>${title}</b><small>${sub}</small></button>`}
+function render(){
+  [...$('steps').children].forEach((el,i)=>el.classList.toggle('on',i<=Math.min(st.step,4)));
+  $('back').hidden=st.step===0||st.step===4;
+  const s=$('screen');
+  if(st.step===0){
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Step 1 of 4</p><h1>What do you want to create?</h1><div class="grid">${Object.entries(CATS).map(([k,v])=>tile(k,Object.keys(v.opts).join(' · '),false,v.c)).join('')}</div></div>`;
+    s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.cat=b.dataset.v;st.step=1;render()});
+  }else if(st.step===1){
+    const o=CATS[st.cat].opts;
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Step 2 of 4 · ${st.cat}</p><h1>Pick a look</h1><div class="grid">${Object.keys(o).map(k=>tile(k,'Tap to choose',st.opt===k,CATS[st.cat].c)).join('')}</div></div>`;
+    s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.opt=b.dataset.v;st.step=2;render()});
+  }else if(st.step===2){
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Step 3 of 4 · Optional</p><h1>Add your photo</h1>
+    <div class="drop">${st.photo?`<img src="${st.photo}" alt="Your photo">`:'<b>Use your own face</b><small style="color:var(--muted)">Or skip, and AI will make a new person</small>'}
+    <label class="btn ghost" for="file" style="width:auto;padding:10px 18px">${st.photo?'Change photo':'Upload photo'}</label>
+    <input id="file" type="file" accept="image/*" hidden></div>
+    <button class="btn" id="next">${st.photo?'Next':'Skip'}</button></div>`;
+    $('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{st.photo=r.result;render()};r.readAsDataURL(f)};
+    $('next').onclick=()=>{st.step=3;render()};
+  }else if(st.step===3){
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Step 4 of 4</p><h1>Choose a style</h1><div class="grid">${Object.keys(STYLES).map(k=>tile(k,STYLES[k],st.style===k)).join('')}</div>
+    <div class="chips"><span class="chip">${st.cat}</span><span class="chip">${st.opt}</span><span class="chip">${st.photo?'Your photo':'No photo'}</span></div>
+    <button class="btn" id="gen" ${st.style?'':'disabled style="opacity:.45"'}>Generate</button></div>`;
+    s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.style=b.dataset.v;render()});
+    $('gen').onclick=()=>{if(!st.style)return;st.step=4;render()};
+  }else{
+    s.innerHTML=`<div class="loading"><div class="spin"></div>Creating your image…<br><small>This takes about 10–20 seconds</small></div>`;
+    generate();
+  }
+}
+async function shrink(dataUrl){
+  return new Promise(res=>{const im=new Image();im.onload=()=>{const m=1024,r=Math.min(1,m/Math.max(im.width,im.height));
+    const c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.88))};im.onerror=()=>res(null);im.src=dataUrl});
+}
+async function generate(){
+  const s=$('screen');
+  try{
+    const photo=st.photo?await shrink(st.photo):null;
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cat:st.cat,opt:st.opt,style:st.style,photo})});
+    const j=await r.json().catch(()=>({error:'Something went wrong. Please try again.'}));
+    if(!r.ok||!j.image)throw new Error(j.error||'Something went wrong. Please try again.');
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Done</p><h1>${st.opt} · ${st.style}</h1>
+    <img class="result" id="out" alt="Your AI image">
+    <a class="btn" id="save" download="tapimagine.png">Save image</a>
+    <p class="note">On phone: press and hold the image to save it.</p>
+    <button class="btn ghost" id="same">Try a different style</button><button class="btn ghost" id="again">Start over</button></div>`;
+    $('out').src=j.image;$('save').href=j.image;
+  }catch(e){
+    s.innerHTML=`<div style="display:grid;gap:14px"><h1>Couldn't make it</h1><div class="err" id="msg"></div>
+    <button class="btn" id="same">Try again</button><button class="btn ghost" id="again">Start over</button></div>`;
+    $('msg').textContent=e.message;
+  }
+  $('again').onclick=()=>{Object.assign(st,{step:0,cat:null,opt:null,style:null,photo:null});render()};
+  $('same').onclick=()=>{st.style=null;st.step=3;render()};
+}
+$('back').onclick=()=>{st.step=Math.max(0,st.step-1);render()};
+render();
+</script>
