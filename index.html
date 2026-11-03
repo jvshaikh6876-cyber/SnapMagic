@@ -69,7 +69,7 @@ const CATS={
  Fantasy:{c:["#7b2ff7","#00d4ff"],opts:{Anime:1,Superhero:1,Fantasy:1}},
  Festival:{c:["#ff8a00","#e52e71"],opts:{Diwali:1,Eid:1,Christmas:1}}
 };
-const STYLES={Realistic:"Real photo look","3D Cartoon":"Like an animated movie","Painting":"Oil painting look","Anime":"Japanese anime look"};
+const STYLES={"3D Cartoon":"Most popular ⭐",Realistic:"Pro photoshoot look","Painting":"Oil painting look","Anime":"Japanese anime look"};
 const st={step:0,cat:null,opt:null,photo:null,style:null};
 const $=id=>document.getElementById(id);
 function tile(title,sub,sel,cols){return `<button class="tile${sel?' sel':''}" data-v="${title}">${cols?`<span class="sw" style="background:linear-gradient(90deg,${cols[0]},${cols[1]})"></span>`:''}<b>${title}</b><small>${sub}</small></button>`}
