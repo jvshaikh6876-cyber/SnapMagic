@@ -5,47 +5,52 @@ const MODEL = "gemini-nano-banana-2.1";
 
 const PROMPTS = {
   Couple: {
-    Romantic: "a romantic couple portrait at golden hour, soft warm light, rose petals in the air",
-    Wedding: "an elegant Indian wedding couple portrait, rich red and gold outfits, decorated mandap behind them",
-    Cinematic: "a cinematic couple scene like a movie poster, moody lighting, rain-lit city street at night",
+    Romantic: "a romantic couple close together at golden hour, gentle smiles, rose petals floating in the air, warm sunset glow",
+    Wedding: "an Indian wedding couple in rich red and gold outfits with jewellery, decorated mandap with marigold flowers and fairy lights behind them",
+    Cinematic: "a couple sharing an umbrella on a rain-lit city street at night, neon reflections, movie poster mood",
   },
   Boys: {
-    Stylish: "a stylish young man in trendy streetwear, urban background, fashion photoshoot",
-    Gym: "a fit man in a modern gym, dramatic lighting, confident athletic pose",
-    Luxury: "a man in a tailored suit standing beside a luxury car, city skyline at night",
+    Stylish: "a stylish young man in trendy streetwear leaning on a wall in a colourful city street, confident look",
+    Gym: "a fit man in a modern gym holding dumbbells, dramatic side lighting, confident expression",
+    Luxury: "a man in a perfectly tailored suit leaning on a shiny supercar, glittering city skyline at night behind him, wealthy confident look",
   },
   Girls: {
-    Fashion: "a young woman in a high-fashion outfit, studio lighting, magazine cover style",
-    Traditional: "a woman in a beautiful saree with traditional jewellery, temple courtyard, soft light",
-    Portrait: "a soft natural-light portrait of a woman, blurred flower garden background",
+    Fashion: "a young woman in a high-fashion outfit, magazine cover look, elegant pose",
+    Traditional: "a woman in a beautiful silk saree with traditional gold jewellery and flowers in her hair, temple courtyard with diyas",
+    Portrait: "a soft dreamy portrait of a woman in a blooming flower garden, gentle smile",
   },
   Professional: {
-    Business: "a confident professional in a business suit, modern office, clean light",
-    LinkedIn: "a clean professional headshot, plain light grey background, friendly smile, shoulders up",
-    Office: "a person working at a stylish desk with a laptop, bright modern office",
+    Business: "a confident professional in a business suit, arms crossed, modern glass office behind",
+    LinkedIn: "a clean professional headshot, shoulders up, plain light grey background, friendly natural smile",
+    Office: "a person working happily at a stylish desk with a laptop and coffee, bright modern office",
   },
   Lifestyle: {
-    "Luxury car": "a person standing next to a luxury sports car at golden hour",
-    Travel: "a traveller at a scenic mountain viewpoint with a backpack, wide landscape",
-    "Rich lifestyle": "a person relaxing beside an infinity pool at a luxury villa",
+    "Luxury car": "a person leaning on a luxury sports car at golden hour, stylish outfit, sunglasses in hand",
+    Travel: "a happy traveller with a backpack at a scenic mountain viewpoint, mountains and clouds behind",
+    "Rich lifestyle": "a person relaxing beside an infinity pool at a luxury villa with a sea view, holding a drink",
   },
   Fantasy: {
-    Anime: "an anime-style character portrait, vibrant colours, detailed eyes",
-    Superhero: "a superhero in a custom suit standing on a rooftop, cape blowing in the wind",
-    Fantasy: "a fantasy warrior in a magical forest full of glowing lights",
+    Anime: "an anime hero character with a cool outfit, vibrant magical background",
+    Superhero: "a superhero in a custom suit on a rooftop at night, cape blowing in the wind, city lights below",
+    Fantasy: "a fantasy warrior in shining armour in a magical forest full of glowing lights",
   },
   Festival: {
-    Diwali: "a festive Diwali portrait with glowing diyas, rangoli and warm lights",
-    Eid: "a joyful Eid portrait with lanterns, a crescent moon and soft golden light",
-    Christmas: "a cosy Christmas portrait beside a decorated tree with fairy lights",
+    Diwali: "a festive Diwali scene, person in a rich embroidered kurta, glowing diyas, colourful rangoli, marigold garlands, lanterns and fireworks",
+    Eid: "a joyful Eid scene, person in elegant festive clothes, glowing lanterns, crescent moon, soft golden light",
+    Christmas: "a cosy Christmas scene beside a decorated tree with fairy lights and gifts, warm sweater",
   },
 };
 
+// How every picture is framed: close, relaxed, full of detail.
+const FRAMING =
+  "Frame the person from the waist up so the face is large and clear. Relaxed, natural pose and a real, happy expression. Rich, detailed background.";
+
 const STYLES = {
-  Realistic: "ultra-realistic photograph",
-  "3D Cartoon": "3D animated movie style",
-  Painting: "oil painting style",
-  Anime: "anime illustration style",
+  "3D Cartoon": "3D animated movie style, like a Pixar film, soft lighting, bright cheerful colours",
+  Realistic:
+    "professional photoshoot by an expensive portrait photographer, shot on 85mm lens, softly blurred background, soft cinematic lighting, natural skin tones, balanced true-to-life colours with no orange tint, sharp focus on the face, magazine quality",
+  Painting: "beautiful oil painting style, visible brush strokes, rich colours",
+  Anime: "anime illustration style, vibrant colours, clean lines",
 };
 
 const SAFETY =
@@ -79,7 +84,7 @@ export default async function handler(req, res) {
   const base = PROMPTS[cat] && PROMPTS[cat][opt];
   if (!base || !STYLES[style]) return res.status(400).json({ error: "Please pick a category, look and style again." });
 
-  let prompt = `Create ${base}, ${STYLES[style]}, high quality, sharp details, portrait 4:5 framing. ${SAFETY}`;
+  let prompt = `Create ${base}. Style: ${STYLES[style]}. ${FRAMING} Portrait 4:5 image, high quality. ${SAFETY}`;
   const input = [];
 
   if (photo) {
