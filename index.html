@@ -36,6 +36,7 @@ h1{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.1;mar
 .btn:focus-visible,.back:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}
+button.wa{background:#25d366;color:#06351b}
 img.result{width:100%;max-width:100%;border-radius:18px;display:block;background:var(--panel)}
 .err{background:#3a1a24;border:1px solid #7a2a3c;border-radius:14px;padding:14px;color:#ffd6de}
 a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box}
@@ -108,19 +109,55 @@ async function shrink(dataUrl){
     const c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);
     c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.88))};im.onerror=()=>res(null);im.src=dataUrl});
 }
+const APP_URL='snapmagic-inky.vercel.app';
+// Adds a small "Made with SnapMagic" label to the bottom of the picture.
+function addLabel(src){
+  return new Promise(res=>{const im=new Image();im.onload=()=>{
+    const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
+    x.drawImage(im,0,0);
+    const f=Math.max(14,Math.round(im.width*0.026)),pad=Math.round(f*0.7);
+    x.font=`700 ${f}px Manrope,system-ui,sans-serif`;
+    const t1='✨ Made with SnapMagic',t2=APP_URL;
+    x.font=`700 ${f}px Manrope,system-ui,sans-serif`;const w1=x.measureText(t1).width;
+    x.font=`600 ${Math.round(f*0.75)}px Manrope,system-ui,sans-serif`;const w2=x.measureText(t2).width;
+    const bw=Math.max(w1,w2)+pad*2,bh=f*2.2+pad,bx=im.width-bw-pad,by=im.height-bh-pad;
+    x.fillStyle='rgba(0,0,0,.55)';x.beginPath();x.roundRect?x.roundRect(bx,by,bw,bh,f*0.6):x.rect(bx,by,bw,bh);x.fill();
+    x.fillStyle='#fff';x.textBaseline='top';
+    x.font=`700 ${f}px Manrope,system-ui,sans-serif`;x.fillText(t1,bx+pad,by+pad*0.7);
+    x.fillStyle='#ffb238';x.font=`600 ${Math.round(f*0.75)}px Manrope,system-ui,sans-serif`;x.fillText(t2,bx+pad,by+pad*0.7+f*1.2);
+    res(c.toDataURL('image/jpeg',0.92));
+  };im.onerror=()=>res(src);im.src=src});
+}
+async function toFile(dataUrl){const b=await (await fetch(dataUrl)).blob();return new File([b],'snapmagic.jpg',{type:'image/jpeg'})}
+async function shareImage(dataUrl){
+  const text=`Look what I made with SnapMagic! ✨ Make yours free: https://${APP_URL}`;
+  try{
+    const file=await toFile(dataUrl);
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+  // Fallback: open WhatsApp with the message; user attaches the saved image.
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
 async function generate(){
   const s=$('screen');
+  s.innerHTML=`<div class="loading"><div class="spin"></div>Creating your image…<br><small>This takes about 10–20 seconds</small></div>`;
   try{
     const photo=st.photo?await shrink(st.photo):null;
     const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cat:st.cat,opt:st.opt,style:st.style,photo})});
     const j=await r.json().catch(()=>({error:'Something went wrong. Please try again.'}));
     if(!r.ok||!j.image)throw new Error(j.error||'Something went wrong. Please try again.');
+    const img=await addLabel(j.image);
     s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Done</p><h1>${st.opt} · ${st.style}</h1>
     <img class="result" id="out" alt="Your AI image">
-    <a class="btn" id="save" download="tapimagine.png">Save image</a>
-    <p class="note">On phone: press and hold the image to save it.</p>
-    <button class="btn ghost" id="same">Try a different style</button><button class="btn ghost" id="again">Start over</button></div>`;
-    $('out').src=j.image;$('save').href=j.image;
+    <button class="btn wa" id="share">Share on WhatsApp</button>
+    <a class="btn ghost" id="save" download="snapmagic.jpg">Save image</a>
+    <p class="note">On phone: you can also press and hold the image to save it.</p>
+    <button class="btn ghost" id="regen">🔄 Generate again</button>
+    <button class="btn ghost" id="same">Try a different style</button>
+    <button class="btn ghost" id="again">Start over</button></div>`;
+    $('out').src=img;$('save').href=img;
+    $('share').onclick=()=>shareImage(img);
+    $('regen').onclick=()=>generate();
   }catch(e){
     s.innerHTML=`<div style="display:grid;gap:14px"><h1>Couldn't make it</h1><div class="err" id="msg"></div>
     <button class="btn" id="same">Try again</button><button class="btn ghost" id="again">Start over</button></div>`;
