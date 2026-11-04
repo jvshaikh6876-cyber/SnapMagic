@@ -45,6 +45,20 @@ const PROMPTS = {
     "Independence Day": "a proud Indian Independence Day scene, person in a white kurta holding a small Indian tricolour flag, tricolour balloons and decorations, bright sunny sky",
     Birthday: "a happy birthday party, person beside a big birthday cake with candles, colourful balloons, confetti and party decorations",
   },
+  Group: {
+    "Family portrait": "a warm family portrait, everyone dressed nicely in coordinated outfits, elegant living room with soft lights",
+    "Family Diwali": "a family celebrating Diwali together, everyone in festive Indian clothes, glowing diyas, rangoli, marigold garlands and fireworks",
+    "Friends trip": "a group of friends on a fun road trip, scenic mountain road and an open jeep behind them, happy and laughing",
+    "Office team": "a confident team photo, everyone in smart office clothes, modern bright office behind them",
+    Party: "a fun party celebration, balloons, fairy lights and confetti, everyone smiling and cheering",
+    "Movie poster": "an epic Bollywood movie poster with the whole group as the heroes, dramatic lighting, action movie mood",
+  },
+  "Profile Pic": {
+    "WhatsApp DP": "a friendly, clean profile picture, soft colourful background, warm smile",
+    "Instagram DP": "a stylish, trendy profile picture, aesthetic pastel background, confident cool look",
+    "LinkedIn photo": "a professional headshot, smart formal clothes, plain light grey background, confident friendly smile",
+    "Cool avatar": "a fun, stylish avatar portrait with a bold colourful background",
+  },
   Kids: {
     "Birthday party": "a happy birthday party for a young child, big colourful cake with candles, balloons, confetti and toys, child in a cute party outfit",
     "Little superhero": "a young child as a cute little superhero in a colourful kid-friendly costume with a small cape, playful heroic pose, bright cartoonish city behind",
@@ -57,7 +71,12 @@ const PROMPTS = {
 
 // How every picture is framed: close, relaxed, full of detail.
 const FRAMING =
-  "Frame the person from the waist up so the face is large and clear. Relaxed, natural pose and a real, happy expression. Rich, detailed background.";
+  "Frame the person from the waist up so the face is large and clear. Relaxed, natural pose and a real, happy expression. Rich, detailed background. Portrait 4:5 image.";
+const FRAMING_BY_CAT = {
+  Couple: "Frame both people from the waist up, close together, so both faces are large and clear. Relaxed, natural, loving poses. Rich, detailed background. Portrait 4:5 image.",
+  Group: "Keep every person from the photo, exactly the same number of people, nobody added or removed. Frame everyone so all faces are clear and visible. Natural, happy poses. Rich, detailed background. Portrait 4:5 image.",
+  "Profile Pic": "Head-and-shoulders portrait, face centred and large, perfect for a round profile picture crop. Square 1:1 image.",
+};
 
 const STYLES = {
   "3D Cartoon": "3D animated movie style, like a Pixar film, soft lighting, bright cheerful colours",
@@ -97,23 +116,25 @@ export default async function handler(req, res) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.status(500).json({ error: "The app is missing its Gemini key. Add GEMINI_API_KEY in Vercel settings." });
 
-  const { cat, opt, style, photo } = req.body || {};
+  const { cat, opt, style, photo, photo2 } = req.body || {};
   const base = PROMPTS[cat] && PROMPTS[cat][opt];
   if (!base || !STYLES[style]) return res.status(400).json({ error: "Please pick a category, look and style again." });
 
-  let prompt = `Create ${base}. Style: ${STYLES[style]}. ${FRAMING} Portrait 4:5 image, high quality. ${SAFETY}`;
+  let prompt = `Create ${base}. Style: ${STYLES[style]}. ${FRAMING_BY_CAT[cat] || FRAMING} High quality. ${SAFETY}`;
   if (cat === "Kids") prompt += " " + KIDS_SAFETY;
   const input = [];
 
-  if (photo) {
-    const m = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(photo);
-    if (!m) return res.status(400).json({ error: "That photo could not be read. Try a JPG or PNG." });
+  const readPhoto = (p) => /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(p || "");
+  const photos = [photo, photo2].filter(Boolean).map(readPhoto);
+  if (photos.some((m) => !m)) return res.status(400).json({ error: "That photo could not be read. Try a JPG or PNG." });
+
+  if (photos.length === 2) {
+    prompt += " The couple is the person in the first attached photo and the person in the second attached photo. Keep both faces, identities and real ages exactly the same.";
+  } else if (photos.length === 1) {
     prompt += " Use the person (or people) from the attached photo and keep their face, identity and real age exactly the same (a child stays a child).";
-    input.push({ type: "text", text: prompt });
-    input.push({ type: "image", mime_type: m[1], data: m[2] });
-  } else {
-    input.push({ type: "text", text: prompt });
   }
+  input.push({ type: "text", text: prompt });
+  photos.forEach((m) => input.push({ type: "image", mime_type: m[1], data: m[2] }));
 
   try {
     const r = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
@@ -138,4 +159,4 @@ export default async function handler(req, res) {
   }
 }
 
-export const config = { api: { bodyParser: { sizeLimit: "4mb" } } };
+export const config = { api: { bodyParser: { sizeLimit: "4.5mb" } } };

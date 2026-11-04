@@ -1,13 +1,13 @@
 <title>TapImagine App Preview</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Manrope:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Hind:wght@500;600;700&family=Manrope:wght@400;600;700&display=swap">
 <style>
 /* Layout: one phone-width app column, step-by-step screens with a progress strip on top */
 :root{
   --bg:#1a1426; --panel:#251c36; --line:#3a2e52; --fg:#f4eefb; --muted:#b4a7c9;
   --accent:#ffb238; --accent-ink:#2a1a00;
-  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
-  --body:"Manrope",ui-sans-serif,system-ui,sans-serif;
+  --display:"Bricolage Grotesque","Hind",ui-sans-serif,system-ui,sans-serif;
+  --body:"Manrope","Hind",ui-sans-serif,system-ui,sans-serif;
   color-scheme:dark;
 }
 html,body{background:var(--bg);color:var(--fg)}
@@ -31,6 +31,11 @@ h1{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.1;mar
 .tile.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
 .drop{border:2px dashed var(--line);border-radius:18px;padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
 .drop img{width:120px;height:120px;object-fit:cover;border-radius:50%}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pair .drop{padding:18px 10px}
+.pair .drop img{width:88px;height:88px}
+.hdr-r{display:flex;gap:8px;align-items:center}
+.tip{font-size:13px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0}
 .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:15px;font:700 16px var(--body);cursor:pointer;width:100%}
 .btn.ghost{background:none;color:var(--fg);border:1px solid var(--line)}
 .btn:focus-visible,.back:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
@@ -56,56 +61,123 @@ details p{font-size:13px;color:var(--muted);margin:8px 0 0}
 <div class="app">
   <header>
     <div class="logo">Tap<span>Imagine</span></div>
-    <button class="back" id="back" hidden>Back</button>
+    <div class="hdr-r">
+      <button class="back" id="lang" aria-label="Change language">हिंदी</button>
+      <button class="back" id="back" hidden>Back</button>
+    </div>
   </header>
   <div class="steps" id="steps"><i></i><i></i><i></i><i></i><i></i></div>
   <main id="screen"></main>
-  <p class="note">Images are made by AI. Please only upload photos you have permission to use.</p>
+  <p class="note" id="foot"></p>
 </div>
 
 <script>
 const CATS={
- Couple:{c:["#ff5e8a","#7b2ff7"],opts:{Romantic:1,Wedding:1,Cinematic:1}},
- Boys:{c:["#2b6cff","#00c2a8"],opts:{Stylish:1,Gym:1,Luxury:1}},
- Girls:{c:["#ff7ac6","#ffb238"],opts:{Fashion:1,Traditional:1,Portrait:1}},
- Professional:{c:["#3a7bd5","#9aa8bd"],opts:{Business:1,LinkedIn:1,Office:1}},
- Lifestyle:{c:["#ffb238","#ff5e3a"],opts:{"Luxury car":1,"Travel":1,"Rich lifestyle":1}},
- Fantasy:{c:["#7b2ff7","#00d4ff"],opts:{Anime:1,Superhero:1,Fantasy:1}},
- Festival:{c:["#ff8a00","#e52e71"],opts:{Diwali:1,Holi:1,Eid:1,"Raksha Bandhan":1,Navratri:1,"Ganesh Chaturthi":1,"Independence Day":1,Christmas:1,Birthday:1}},
- Kids:{c:["#4cd4ff","#ffd23f"],opts:{"Birthday party":1,"Little superhero":1,Astronaut:1,"Cricket star":1,"Little prince/princess":1,"Cartoon world":1}}
+ Couple:{c:["#ff5e8a","#7b2ff7"],opts:["Romantic","Wedding","Cinematic"]},
+ Boys:{c:["#2b6cff","#00c2a8"],opts:["Stylish","Gym","Luxury"]},
+ Girls:{c:["#ff7ac6","#ffb238"],opts:["Fashion","Traditional","Portrait"]},
+ Kids:{c:["#4cd4ff","#ffd23f"],opts:["Birthday party","Little superhero","Astronaut","Cricket star","Little prince/princess","Cartoon world"]},
+ Festival:{c:["#ff8a00","#e52e71"],opts:["Diwali","Holi","Eid","Raksha Bandhan","Navratri","Ganesh Chaturthi","Independence Day","Christmas","Birthday"]},
+ Group:{c:["#00c2a8","#ffd23f"],opts:["Family portrait","Family Diwali","Friends trip","Office team","Party","Movie poster"]},
+ "Profile Pic":{c:["#7b2ff7","#ff7ac6"],opts:["WhatsApp DP","Instagram DP","LinkedIn photo","Cool avatar"]},
+ Professional:{c:["#3a7bd5","#9aa8bd"],opts:["Business","LinkedIn","Office"]},
+ Lifestyle:{c:["#ffb238","#ff5e3a"],opts:["Luxury car","Travel","Rich lifestyle"]},
+ Fantasy:{c:["#7b2ff7","#00d4ff"],opts:["Anime","Superhero","Fantasy"]}
 };
-const STYLES={"3D Cartoon":"Most popular ⭐",Realistic:"Pro photoshoot look","Painting":"Oil painting look","Anime":"Japanese anime look"};
-const st={step:0,cat:null,opt:null,photo:null,style:null};
+const STYLES={"3D Cartoon":["Most popular ⭐","सबसे लोकप्रिय ⭐"],Realistic:["Pro photoshoot look","प्रो फोटोशूट लुक"],Painting:["Oil painting look","ऑयल पेंटिंग लुक"],Anime:["Japanese anime look","जापानी एनीमे लुक"]};
+
+// Hindi names for categories, looks and styles (English is the key).
+const HI={Couple:"कपल",Boys:"लड़के",Girls:"लड़कियाँ",Kids:"बच्चे",Festival:"त्योहार",Group:"ग्रुप / परिवार","Profile Pic":"प्रोफाइल फोटो",Professional:"प्रोफेशनल",Lifestyle:"लाइफस्टाइल",Fantasy:"फैंटेसी",
+ Romantic:"रोमांटिक",Wedding:"शादी",Cinematic:"सिनेमैटिक",Stylish:"स्टाइलिश",Gym:"जिम",Luxury:"लग्ज़री",Fashion:"फैशन",Traditional:"ट्रेडिशनल",Portrait:"पोर्ट्रेट",
+ "Birthday party":"बर्थडे पार्टी","Little superhero":"नन्हा सुपरहीरो",Astronaut:"अंतरिक्ष यात्री","Cricket star":"क्रिकेट स्टार","Little prince/princess":"नन्हा राजकुमार/राजकुमारी","Cartoon world":"कार्टून दुनिया",
+ Diwali:"दिवाली",Holi:"होली",Eid:"ईद","Raksha Bandhan":"रक्षाबंधन",Navratri:"नवरात्रि","Ganesh Chaturthi":"गणेश चतुर्थी","Independence Day":"स्वतंत्रता दिवस",Christmas:"क्रिसमस",Birthday:"जन्मदिन",
+ "Family portrait":"फैमिली फोटो","Family Diwali":"फैमिली दिवाली","Friends trip":"दोस्तों की ट्रिप","Office team":"ऑफिस टीम",Party:"पार्टी","Movie poster":"मूवी पोस्टर",
+ "WhatsApp DP":"व्हाट्सएप DP","Instagram DP":"इंस्टाग्राम DP","LinkedIn photo":"लिंक्डइन फोटो","Cool avatar":"कूल अवतार",
+ Business:"बिज़नेस",LinkedIn:"लिंक्डइन",Office:"ऑफिस","Luxury car":"लग्ज़री कार",Travel:"ट्रैवल","Rich lifestyle":"रिच लाइफस्टाइल",Anime:"एनीमे",Superhero:"सुपरहीरो",
+ "3D Cartoon":"3D कार्टून",Realistic:"रियलिस्टिक",Painting:"पेंटिंग"};
+
+const TXT={
+ step1:["Step 1 of 4","स्टेप 1 / 4"],q:["What do you want to create?","आप क्या बनाना चाहते हैं?"],
+ step2:["Step 2 of 4","स्टेप 2 / 4"],pick:["Pick a look","लुक चुनें"],tap:["Tap to choose","चुनने के लिए टैप करें"],
+ step3:["Step 3 of 4 · Optional","स्टेप 3 / 4 · ज़रूरी नहीं"],
+ addPhoto:["Add your photo","अपनी फोटो जोड़ें"],addChild:["Add your child's photo","बच्चे की फोटो जोड़ें"],addGroup:["Add your group photo","ग्रुप फोटो जोड़ें"],addCouple:["Add your photos","अपनी फोटो जोड़ें"],
+ useFace:["Use your own face","अपना चेहरा इस्तेमाल करें"],skipNew:["Or skip, and AI will make a new person","या स्किप करें, AI नया चेहरा बनाएगा"],
+ childFace:["Use a clear photo of the child","बच्चे की साफ़ फोटो लगाएं"],skipChild:["Or skip, and AI will make a cute new child","या स्किप करें, AI एक प्यारा बच्चा बनाएगा"],
+ groupFace:["Use a photo of your family or friends","परिवार या दोस्तों की फोटो लगाएं"],skipGroup:["Or skip, and AI will make a new group","या स्किप करें, AI नया ग्रुप बनाएगा"],
+ you:["You","आप"],partner:["Partner","पार्टनर"],
+ upload:["Upload photo","फोटो अपलोड करें"],change:["Change photo","फोटो बदलें"],
+ tipSolo:["💡 Best results: a clear, front-facing photo of just you, in good light.","💡 बेहतरीन रिज़ल्ट: अच्छी रोशनी में सिर्फ़ आपकी साफ़, सामने से ली गई फोटो।"],
+ tipGroup:["💡 Works best with 2–6 people, with every face clearly visible.","💡 2–6 लोगों की फोटो सबसे अच्छी आती है, सबके चेहरे साफ़ दिखने चाहिए।"],
+ tipCouple:["💡 Add one clear photo of each person, or just one photo of you both together.","💡 दोनों की एक-एक साफ़ फोटो लगाएं, या दोनों की एक साथ वाली एक फोटो।"],
+ kidNote:["👶 Only upload a child's photo if you are their parent or have family permission.","👶 बच्चे की फोटो तभी लगाएं जब आप माता-पिता हों या परिवार की इजाज़त हो।"],
+ next:["Next","आगे"],skip:["Skip","स्किप"],
+ step4:["Step 4 of 4","स्टेप 4 / 4"],choose:["Choose a style","स्टाइल चुनें"],yourPhoto:["Your photo","आपकी फोटो"],noPhoto:["No photo","फोटो नहीं"],gen:["Generate","बनाएं"],
+ creating:["Creating your image…","आपकी फोटो बन रही है…"],wait:["This takes about 10–20 seconds","इसमें 10–20 सेकंड लगते हैं"],
+ done:["Done","तैयार"],cardTitle:["💌 Make it a greeting card","💌 ग्रीटिंग कार्ड बनाएं"],yourName:["Your name","आपका नाम"],bdayName:["Birthday person's name","जिसका जन्मदिन है, उसका नाम"],
+ egName:["e.g. Javed & Family","जैसे: जावेद और परिवार"],egBday:["e.g. Aarav","जैसे: आरव"],addCard:["Add card","कार्ड जोड़ें"],update:["Update card","कार्ड बदलें"],
+ share:["Share on WhatsApp","व्हाट्सएप पर शेयर करें"],save:["Save image","फोटो सेव करें"],hold:["On phone: you can also press and hold the image to save it.","फोन पर: फोटो को दबाकर रखें और सेव करें।"],
+ regen:["🔄 Generate again","🔄 फिर से बनाएं"],diff:["Try a different style","दूसरा स्टाइल आज़माएं"],over:["Start over","शुरू से करें"],
+ fail:["Couldn't make it","फोटो नहीं बन पाई"],tryAgain:["Try again","फिर कोशिश करें"],back:["Back","पीछे"],
+ err:["Something went wrong. Please try again.","कुछ गड़बड़ हो गई। कृपया फिर कोशिश करें।"],
+ foot:["Images are made by AI. Please only upload photos you have permission to use.","फोटो AI से बनती हैं। सिर्फ़ वही फोटो अपलोड करें जिनकी आपको इजाज़त है।"],
+ shareText:["Look what I made with SnapMagic! ✨ Make yours free: ","देखो SnapMagic से मैंने क्या बनाया! ✨ आप भी फ्री में बनाओ: "],
+ langBtn:["हिंदी","English"]
+};
+let lang='en';try{lang=localStorage.getItem('sm_lang')||'en'}catch(e){}
+const L=()=>lang==='hi'?1:0;
+const t=k=>TXT[k][L()];
+const nm=k=>lang==='hi'&&HI[k]?HI[k]:k;
+
+const st={step:0,cat:null,opt:null,photo:null,photo2:null,style:null};
 const $=id=>document.getElementById(id);
-function tile(title,sub,sel,cols){return `<button class="tile${sel?' sel':''}" data-v="${title}">${cols?`<span class="sw" style="background:linear-gradient(90deg,${cols[0]},${cols[1]})"></span>`:''}<b>${title}</b><small>${sub}</small></button>`}
+const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function tile(key,sub,sel,cols){return `<button class="tile${sel?' sel':''}" data-v="${esc(key)}">${cols?`<span class="sw" style="background:linear-gradient(90deg,${cols[0]},${cols[1]})"></span>`:''}<b>${esc(nm(key))}</b><small>${esc(sub)}</small></button>`}
+function readFile(f,cb){const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(f)}
 function render(){
+  document.documentElement.lang=lang==='hi'?'hi':'en';
+  $('lang').textContent=t('langBtn');$('back').textContent=t('back');$('foot').textContent=t('foot');
   [...$('steps').children].forEach((el,i)=>el.classList.toggle('on',i<=Math.min(st.step,4)));
   $('back').hidden=st.step===0||st.step===4;
   const s=$('screen');
   if(st.step===0){
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Step 1 of 4</p><h1>What do you want to create?</h1><div class="grid">${Object.entries(CATS).map(([k,v])=>tile(k,Object.keys(v.opts).join(' · '),false,v.c)).join('')}</div></div>`;
-    s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.cat=b.dataset.v;st.step=1;render()});
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step1')}</p><h1>${t('q')}</h1><div class="grid">${Object.entries(CATS).map(([k,v])=>tile(k,v.opts.map(nm).join(' · '),false,v.c)).join('')}</div></div>`;
+    s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.cat=b.dataset.v;st.opt=null;st.step=1;render()});
   }else if(st.step===1){
-    const o=CATS[st.cat].opts;
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Step 2 of 4 · ${st.cat}</p><h1>Pick a look</h1><div class="grid">${Object.keys(o).map(k=>tile(k,'Tap to choose',st.opt===k,CATS[st.cat].c)).join('')}</div></div>`;
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step2')} · ${esc(nm(st.cat))}</p><h1>${t('pick')}</h1><div class="grid">${CATS[st.cat].opts.map(k=>tile(k,t('tap'),st.opt===k,CATS[st.cat].c)).join('')}</div></div>`;
     s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.opt=b.dataset.v;st.step=2;render()});
   }else if(st.step===2){
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Step 3 of 4 · Optional</p><h1>${st.cat==='Kids'?'Add your child\'s photo':'Add your photo'}</h1>
-    <div class="drop">${st.photo?`<img src="${st.photo}" alt="Your photo">`:(st.cat==='Kids'?'<b>Use a clear photo of the child</b><small style="color:var(--muted)">Or skip, and AI will make a cute new child</small>':'<b>Use your own face</b><small style="color:var(--muted)">Or skip, and AI will make a new person</small>')}
-    <label class="btn ghost" for="file" style="width:auto;padding:10px 18px">${st.photo?'Change photo':'Upload photo'}</label>
-    <input id="file" type="file" accept="image/*" hidden></div>
-    ${st.cat==='Kids'?'<p class="note" style="text-align:left">👶 Only upload a child\'s photo if you are their parent or have family permission.</p>':''}
-    <button class="btn" id="next">${st.photo?'Next':'Skip'}</button></div>`;
-    $('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{st.photo=r.result;render()};r.readAsDataURL(f)};
+    const kids=st.cat==='Kids',group=st.cat==='Group',couple=st.cat==='Couple';
+    const slot=(id,label,img)=>`<div class="drop">${img?`<img src="${img}" alt="">`:''}<b>${label}</b>
+      <label class="btn ghost" for="${id}" style="width:auto;padding:10px 14px">${img?t('change'):t('upload')}</label>
+      <input id="${id}" type="file" accept="image/*" hidden></div>`;
+    let title,area,tip;
+    if(couple){
+      title=t('addCouple');tip=t('tipCouple');
+      area=`<div class="pair">${slot('file',t('you'),st.photo)}${slot('file2',t('partner'),st.photo2)}</div>`;
+    }else{
+      title=kids?t('addChild'):group?t('addGroup'):t('addPhoto');
+      tip=group?t('tipGroup'):t('tipSolo');
+      const [a,b]=kids?[t('childFace'),t('skipChild')]:group?[t('groupFace'),t('skipGroup')]:[t('useFace'),t('skipNew')];
+      area=`<div class="drop">${st.photo?`<img src="${st.photo}" alt="">`:`<b>${a}</b><small style="color:var(--muted)">${b}</small>`}
+      <label class="btn ghost" for="file" style="width:auto;padding:10px 18px">${st.photo?t('change'):t('upload')}</label>
+      <input id="file" type="file" accept="image/*" hidden></div>`;
+    }
+    const has=st.photo||st.photo2;
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step3')}</p><h1>${title}</h1>${area}
+    <p class="tip">${tip}</p>
+    ${kids?`<p class="note" style="text-align:left">${t('kidNote')}</p>`:''}
+    <button class="btn" id="next">${has?t('next'):t('skip')}</button></div>`;
+    $('file').onchange=e=>{const f=e.target.files[0];if(f)readFile(f,d=>{st.photo=d;render()})};
+    if($('file2'))$('file2').onchange=e=>{const f=e.target.files[0];if(f)readFile(f,d=>{st.photo2=d;render()})};
     $('next').onclick=()=>{st.step=3;render()};
   }else if(st.step===3){
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Step 4 of 4</p><h1>Choose a style</h1><div class="grid">${Object.keys(STYLES).map(k=>tile(k,STYLES[k],st.style===k)).join('')}</div>
-    <div class="chips"><span class="chip">${st.cat}</span><span class="chip">${st.opt}</span><span class="chip">${st.photo?'Your photo':'No photo'}</span></div>
-    <button class="btn" id="gen" ${st.style?'':'disabled style="opacity:.45"'}>Generate</button></div>`;
+    const has=st.photo||st.photo2;
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step4')}</p><h1>${t('choose')}</h1><div class="grid">${Object.keys(STYLES).map(k=>tile(k,STYLES[k][L()],st.style===k)).join('')}</div>
+    <div class="chips"><span class="chip">${esc(nm(st.cat))}</span><span class="chip">${esc(nm(st.opt))}</span><span class="chip">${has?t('yourPhoto'):t('noPhoto')}</span></div>
+    <button class="btn" id="gen" ${st.style?'':'disabled style="opacity:.45"'}>${t('gen')}</button></div>`;
     s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.style=b.dataset.v;render()});
     $('gen').onclick=()=>{if(!st.style)return;st.step=4;render()};
   }else{
-    s.innerHTML=`<div class="loading"><div class="spin"></div>Creating your image…<br><small>This takes about 10–20 seconds</small></div>`;
     generate();
   }
 }
@@ -115,7 +187,7 @@ async function shrink(dataUrl){
     c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.88))};im.onerror=()=>res(null);im.src=dataUrl});
 }
 const APP_URL='snapmagic-inky.vercel.app';
-// Adds a small app-name label to the bottom corner of the picture.
+// Adds a small app-name label to a corner of the picture.
 const LABEL='✨ Made with SnapMagic';
 function addLabel(src,top){
   return new Promise(res=>{const im=new Image();im.onload=()=>{
@@ -129,31 +201,36 @@ function addLabel(src,top){
     res(c.toDataURL('image/jpeg',0.92));
   };im.onerror=()=>res(src);im.src=src});
 }
-const WISHES={Diwali:'Happy Diwali',Holi:'Happy Holi',Eid:'Eid Mubarak','Raksha Bandhan':'Happy Raksha Bandhan',Navratri:'Happy Navratri','Ganesh Chaturthi':'Ganpati Bappa Morya','Independence Day':'Happy Independence Day',Christmas:'Merry Christmas',Birthday:'Happy Birthday','Birthday party':'Happy Birthday'};
+const WISHES={
+ Diwali:['Happy Diwali','शुभ दीपावली'],'Family Diwali':['Happy Diwali','शुभ दीपावली'],Holi:['Happy Holi','होली की शुभकामनाएं'],Eid:['Eid Mubarak','ईद मुबारक'],
+ 'Raksha Bandhan':['Happy Raksha Bandhan','रक्षाबंधन की शुभकामनाएं'],Navratri:['Happy Navratri','नवरात्रि की शुभकामनाएं'],'Ganesh Chaturthi':['Ganpati Bappa Morya','गणपति बप्पा मोरया'],
+ 'Independence Day':['Happy Independence Day','स्वतंत्रता दिवस की शुभकामनाएं'],Christmas:['Merry Christmas','मेरी क्रिसमस'],Birthday:['Happy Birthday','जन्मदिन मुबारक'],'Birthday party':['Happy Birthday','जन्मदिन मुबारक']};
 const isBday=o=>o==='Birthday'||o==='Birthday party';
+const CARD_FONT='"Bricolage Grotesque","Hind",system-ui,sans-serif',CARD_FONT2='Manrope,"Hind",system-ui,sans-serif';
 // Draws the wish and name on the picture, like a greeting card.
-function makeCard(src,wish,name,bday){
+async function makeCard(src,wish,name,bday){
+  try{await Promise.all([document.fonts.load('800 40px "Bricolage Grotesque"'),document.fonts.load('700 40px Hind','अ')])}catch(e){}
   return new Promise(res=>{const im=new Image();im.onload=()=>{
     const W=im.width,H=im.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
     x.drawImage(im,0,0);
     const g=x.createLinearGradient(0,H*0.62,0,H);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(0.45,'rgba(0,0,0,.55)');g.addColorStop(1,'rgba(0,0,0,.8)');
     x.fillStyle=g;x.fillRect(0,H*0.62,W,H*0.38);
     x.textAlign='center';x.textBaseline='alphabetic';
-    let line1=wish,line2=name?(bday?name:'from '+name):'';
-    if(bday&&name){line1=wish+',';}
-    let f1=Math.round(W*0.085);x.font=`800 ${f1}px "Bricolage Grotesque",system-ui,sans-serif`;
-    while(x.measureText(line1).width>W*0.9&&f1>12){f1-=2;x.font=`800 ${f1}px "Bricolage Grotesque",system-ui,sans-serif`}
+    let line1=wish,line2='';
+    if(name){line2=bday?name:(lang==='hi'?name+' की ओर से':'from '+name);if(bday)line1=wish+',';}
+    let f1=Math.round(W*0.085);x.font=`800 ${f1}px ${CARD_FONT}`;
+    while(x.measureText(line1).width>W*0.9&&f1>12){f1-=2;x.font=`800 ${f1}px ${CARD_FONT}`}
     const f2=Math.round(f1*0.55);
     const y2=H-Math.round(H*0.05),y1=line2?y2-f2*1.5:y2;
     x.shadowColor='rgba(0,0,0,.5)';x.shadowBlur=f1*0.2;
     x.fillStyle='#ffd27a';x.fillText(line1,W/2,y1);
-    if(line2){x.font=`700 ${f2}px Manrope,system-ui,sans-serif`;let t=line2;while(x.measureText(t).width>W*0.9&&t.length>4)t=t.slice(0,-2);x.fillStyle='#fff';x.fillText(t,W/2,y2)}
+    if(line2){x.font=`700 ${f2}px ${CARD_FONT2}`;let tt=line2;while(x.measureText(tt).width>W*0.9&&tt.length>4)tt=tt.slice(0,-2);x.fillStyle='#fff';x.fillText(tt,W/2,y2)}
     res(c.toDataURL('image/jpeg',0.92));
   };im.onerror=()=>res(src);im.src=src});
 }
 async function toFile(dataUrl){const b=await (await fetch(dataUrl)).blob();return new File([b],'snapmagic.jpg',{type:'image/jpeg'})}
 async function shareImage(dataUrl){
-  const text=`Look what I made with SnapMagic! ✨ Make yours free: https://${APP_URL}`;
+  const text=t('shareText')+'https://'+APP_URL;
   try{
     const file=await toFile(dataUrl);
     if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}
@@ -163,28 +240,30 @@ async function shareImage(dataUrl){
 }
 async function generate(){
   const s=$('screen');
-  s.innerHTML=`<div class="loading"><div class="spin"></div>Creating your image…<br><small>This takes about 10–20 seconds</small></div>`;
+  $('back').hidden=true;
+  s.innerHTML=`<div class="loading"><div class="spin"></div>${t('creating')}<br><small>${t('wait')}</small></div>`;
   try{
     const photo=st.photo?await shrink(st.photo):null;
-    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cat:st.cat,opt:st.opt,style:st.style,photo})});
-    const j=await r.json().catch(()=>({error:'Something went wrong. Please try again.'}));
-    if(!r.ok||!j.image)throw new Error(j.error||'Something went wrong. Please try again.');
+    const photo2=st.cat==='Couple'&&st.photo2?await shrink(st.photo2):null;
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cat:st.cat,opt:st.opt,style:st.style,photo:photo||photo2,photo2:photo&&photo2?photo2:null})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.image)throw new Error(lang==='hi'?t('err'):(j.error||t('err')));
     const base=j.image;let cur=await addLabel(base);
-    const wish=WISHES[st.opt];
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">Done</p><h1>${st.opt} · ${st.style}</h1>
-    <img class="result" id="out" alt="Your AI image">
+    const w=WISHES[st.opt],wish=w&&w[L()];
+    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('done')}</p><h1>${esc(nm(st.opt))} · ${esc(nm(st.style))}</h1>
+    <img class="result" id="out" alt="">
     ${wish?`<div class="card">
-      <b>💌 Make it a greeting card</b>
-      <label for="cardname" class="note" style="text-align:left">${isBday(st.opt)?'Birthday person\'s name':'Your name'}</label>
-      <input id="cardname" maxlength="32" placeholder="${isBday(st.opt)?'e.g. Aarav':'e.g. Javed & Family'}">
-      <button class="btn" id="mkcard">Add "${wish}" card</button>
+      <b>${t('cardTitle')}</b>
+      <label for="cardname" class="note" style="text-align:left">${isBday(st.opt)?t('bdayName'):t('yourName')}</label>
+      <input id="cardname" maxlength="32" placeholder="${isBday(st.opt)?t('egBday'):t('egName')}">
+      <button class="btn" id="mkcard">${t('addCard')}: "${wish}"</button>
     </div>`:''}
-    <button class="btn wa" id="share">Share on WhatsApp</button>
-    <a class="btn ghost" id="save" download="snapmagic.jpg">Save image</a>
-    <p class="note">On phone: you can also press and hold the image to save it.</p>
-    <button class="btn ghost" id="regen">🔄 Generate again</button>
-    <button class="btn ghost" id="same">Try a different style</button>
-    <button class="btn ghost" id="again">Start over</button></div>`;
+    <button class="btn wa" id="share">${t('share')}</button>
+    <a class="btn ghost" id="save" download="snapmagic.jpg">${t('save')}</a>
+    <p class="note">${t('hold')}</p>
+    <button class="btn ghost" id="regen">${t('regen')}</button>
+    <button class="btn ghost" id="same">${t('diff')}</button>
+    <button class="btn ghost" id="again">${t('over')}</button></div>`;
     const show=src=>{cur=src;$('out').src=src;$('save').href=src};
     show(cur);
     $('share').onclick=()=>shareImage(cur);
@@ -192,16 +271,17 @@ async function generate(){
     if(wish)$('mkcard').onclick=async()=>{
       const name=$('cardname').value.trim();
       show(await addLabel(await makeCard(base,wish,name,isBday(st.opt)),true));
-      $('mkcard').textContent='Update card';
+      $('mkcard').textContent=t('update');
     };
   }catch(e){
-    s.innerHTML=`<div style="display:grid;gap:14px"><h1>Couldn't make it</h1><div class="err" id="msg"></div>
-    <button class="btn" id="same">Try again</button><button class="btn ghost" id="again">Start over</button></div>`;
+    s.innerHTML=`<div style="display:grid;gap:14px"><h1>${t('fail')}</h1><div class="err" id="msg"></div>
+    <button class="btn" id="same">${t('tryAgain')}</button><button class="btn ghost" id="again">${t('over')}</button></div>`;
     $('msg').textContent=e.message;
   }
-  $('again').onclick=()=>{Object.assign(st,{step:0,cat:null,opt:null,style:null,photo:null});render()};
+  $('again').onclick=()=>{Object.assign(st,{step:0,cat:null,opt:null,style:null,photo:null,photo2:null});render()};
   $('same').onclick=()=>{st.style=null;st.step=3;render()};
 }
 $('back').onclick=()=>{st.step=Math.max(0,st.step-1);render()};
+$('lang').onclick=()=>{lang=lang==='hi'?'en':'hi';try{localStorage.setItem('sm_lang',lang)}catch(e){}if(st.step<4)render();else{ /* keep result on screen */ $('lang').textContent=t('langBtn');$('foot').textContent=t('foot');}};
 render();
 </script>
