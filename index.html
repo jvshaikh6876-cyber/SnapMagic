@@ -110,21 +110,17 @@ async function shrink(dataUrl){
     c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.88))};im.onerror=()=>res(null);im.src=dataUrl});
 }
 const APP_URL='snapmagic-inky.vercel.app';
-// Adds a small "Made with SnapMagic" label to the bottom of the picture.
+// Adds a small app-name label to the bottom corner of the picture.
+const LABEL='✨ Made with SnapMagic';
 function addLabel(src){
   return new Promise(res=>{const im=new Image();im.onload=()=>{
     const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
     x.drawImage(im,0,0);
     const f=Math.max(14,Math.round(im.width*0.026)),pad=Math.round(f*0.7);
     x.font=`700 ${f}px Manrope,system-ui,sans-serif`;
-    const t1='✨ Made with SnapMagic',t2=APP_URL;
-    x.font=`700 ${f}px Manrope,system-ui,sans-serif`;const w1=x.measureText(t1).width;
-    x.font=`600 ${Math.round(f*0.75)}px Manrope,system-ui,sans-serif`;const w2=x.measureText(t2).width;
-    const bw=Math.max(w1,w2)+pad*2,bh=f*2.2+pad,bx=im.width-bw-pad,by=im.height-bh-pad;
+    const bw=x.measureText(LABEL).width+pad*2,bh=f+pad*1.4,bx=im.width-bw-pad,by=im.height-bh-pad;
     x.fillStyle='rgba(0,0,0,.55)';x.beginPath();x.roundRect?x.roundRect(bx,by,bw,bh,f*0.6):x.rect(bx,by,bw,bh);x.fill();
-    x.fillStyle='#fff';x.textBaseline='top';
-    x.font=`700 ${f}px Manrope,system-ui,sans-serif`;x.fillText(t1,bx+pad,by+pad*0.7);
-    x.fillStyle='#ffb238';x.font=`600 ${Math.round(f*0.75)}px Manrope,system-ui,sans-serif`;x.fillText(t2,bx+pad,by+pad*0.7+f*1.2);
+    x.fillStyle='#fff';x.textBaseline='middle';x.fillText(LABEL,bx+pad,by+bh/2);
     res(c.toDataURL('image/jpeg',0.92));
   };im.onerror=()=>res(src);im.src=src});
 }
