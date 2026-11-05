@@ -110,6 +110,39 @@ function findImage(node, found = []) {
   return found;
 }
 
+// ---- Money protection: daily limits (works when Upstash Redis is connected in Vercel) ----
+const DAILY_LIMIT = Number(process.env.DAILY_LIMIT || 50); // free images for the whole app per day
+const PER_IP_LIMIT = Number(process.env.PER_IP_LIMIT || 5); // free images per internet connection per day
+const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+
+async function redis(cmds) {
+  const r = await fetch(`${REDIS_URL}/pipeline`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, "Content-Type": "application/json" },
+    body: JSON.stringify(cmds),
+  });
+  return r.json();
+}
+
+// Returns null if allowed, or an error code if a limit is reached.
+async function takeSlot(ip) {
+  if (!REDIS_URL || !REDIS_TOKEN) return { code: null, undo: async () => {} }; // no store connected: no limits
+  const day = new Date(Date.now() + 5.5 * 3600 * 1000).toISOString().slice(0, 10); // India date
+  const kAll = `free:${day}`, kIp = `free:${day}:${ip}`;
+  try {
+    const out = await redis([["INCR", kAll], ["EXPIRE", kAll, 172800], ["INCR", kIp], ["EXPIRE", kIp, 172800]]);
+    const all = out[0].result, mine = out[2].result;
+    const undo = async () => { try { await redis([["DECR", kAll], ["DECR", kIp]]); } catch (e) {} };
+    if (all > DAILY_LIMIT) { await undo(); return { code: "daily_cap", undo: async () => {} }; }
+    if (mine > PER_IP_LIMIT) { await undo(); return { code: "ip_cap", undo: async () => {} }; }
+    return { code: null, undo };
+  } catch (e) {
+    console.error("limit check failed", e);
+    return { code: null, undo: async () => {} };
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Use POST." });
 
@@ -120,13 +153,18 @@ export default async function handler(req, res) {
   const base = PROMPTS[cat] && PROMPTS[cat][opt];
   if (!base || !STYLES[style]) return res.status(400).json({ error: "Please pick a category, look and style again." });
 
+  const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "unknown";
+  const slot = await takeSlot(ip);
+  if (slot.code === "daily_cap") return res.status(429).json({ code: "daily_cap", error: "Today's free images are finished. Please come back tomorrow!" });
+  if (slot.code === "ip_cap") return res.status(429).json({ code: "ip_cap", error: "You've used today's free images. Please come back tomorrow!" });
+
   let prompt = `Create ${base}. Style: ${STYLES[style]}. ${FRAMING_BY_CAT[cat] || FRAMING} High quality. ${SAFETY}`;
   if (cat === "Kids") prompt += " " + KIDS_SAFETY;
   const input = [];
 
   const readPhoto = (p) => /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(p || "");
   const photos = [photo, photo2].filter(Boolean).map(readPhoto);
-  if (photos.some((m) => !m)) return res.status(400).json({ error: "That photo could not be read. Try a JPG or PNG." });
+  if (photos.some((m) => !m)) { await slot.undo(); return res.status(400).json({ error: "That photo could not be read. Try a JPG or PNG." }); }
 
   if (photos.length === 2) {
     prompt += " The couple is the person in the first attached photo and the person in the second attached photo. Keep both faces, identities and real ages exactly the same.";
@@ -145,16 +183,19 @@ export default async function handler(req, res) {
     const json = await r.json().catch(() => ({}));
     if (!r.ok) {
       console.error("Gemini error", r.status, JSON.stringify(json).slice(0, 500));
+      await slot.undo();
       return res.status(502).json({ error: "The image AI is busy or refused this request. Please try again." });
     }
     const imgs = findImage(json);
     if (!imgs.length) {
+      await slot.undo();
       return res.status(422).json({ error: "No image came back. Try a different photo or look." });
     }
     const last = imgs[imgs.length - 1];
     return res.status(200).json({ image: `data:${last.mime};base64,${last.data}` });
   } catch (e) {
     console.error(e);
+    await slot.undo();
     return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 }

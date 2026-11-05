@@ -1,4 +1,4 @@
-<title>TapImagine App Preview</title>
+<title>SnapMagic</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Hind:wght@500;600;700&family=Manrope:wght@400;600;700&display=swap">
 <style>
@@ -34,6 +34,11 @@ h1{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.1;mar
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pair .drop{padding:18px 10px}
 .pair .drop img{width:88px;height:88px}
+.banner{display:flex;align-items:center;gap:12px;text-align:left;width:100%;cursor:pointer;border:0;border-radius:18px;padding:16px;color:#2a1200;background:linear-gradient(120deg,#ffb238,#ff7a3d 60%,#e52e71);font:inherit}
+.banner span.em{font-size:34px;line-height:1}
+.banner b{display:block;font-family:var(--display);font-size:19px;line-height:1.15}
+.banner small{display:block;font-size:13px;opacity:.85;margin-top:2px}
+.banner:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .hdr-r{display:flex;gap:8px;align-items:center}
 .tip{font-size:13px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0}
 .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:15px;font:700 16px var(--body);cursor:pointer;width:100%}
@@ -60,7 +65,7 @@ details p{font-size:13px;color:var(--muted);margin:8px 0 0}
 
 <div class="app">
   <header>
-    <div class="logo">Tap<span>Imagine</span></div>
+    <div class="logo">Snap<span>Magic</span></div>
     <div class="hdr-r">
       <button class="back" id="lang" aria-label="Change language">हिंदी</button>
       <button class="back" id="back" hidden>Back</button>
@@ -121,13 +126,23 @@ const TXT={
  err:["Something went wrong. Please try again.","कुछ गड़बड़ हो गई। कृपया फिर कोशिश करें।"],
  foot:["Images are made by AI. Please only upload photos you have permission to use.","फोटो AI से बनती हैं। सिर्फ़ वही फोटो अपलोड करें जिनकी आपको इजाज़त है।"],
  shareText:["Look what I made with SnapMagic! ✨ Make yours free: ","देखो SnapMagic से मैंने क्या बनाया! ✨ आप भी फ्री में बनाओ: "],
- langBtn:["हिंदी","English"]
+ langBtn:["हिंदी","English"],
+ banner:["Make your Diwali card in 1 tap","1 टैप में अपना दिवाली कार्ड बनाएं"],bannerSub:["Add your photo · get a Happy Diwali card to share","अपनी फोटो लगाएं · शेयर करने के लिए दिवाली कार्ड पाएं"],
+ limitTitle:["You've used your free images 🎉","आपकी फ्री फोटो खत्म हो गईं 🎉"],
+ limitText:["Thanks for trying SnapMagic! More images are coming soon with our app on the Play Store.","SnapMagic आज़माने के लिए धन्यवाद! जल्द ही Play Store पर ऐप के साथ और फोटो बना सकेंगे।"],
+ dailyCap:["Today's free images are finished 🎆 Please come back tomorrow!","आज की फ्री फोटो खत्म हो गईं 🎆 कृपया कल फिर आएं!"],
+ left:["free images left","फ्री फोटो बाकी"]
 };
 let lang='en';try{lang=localStorage.getItem('sm_lang')||'en'}catch(e){}
 const L=()=>lang==='hi'?1:0;
 const t=k=>TXT[k][L()];
 const nm=k=>lang==='hi'&&HI[k]?HI[k]:k;
 
+const FREE_LIMIT=2; // free images per phone
+const used=()=>{try{return +localStorage.getItem('sm_used')||0}catch(e){return 0}};
+const addUsed=()=>{try{localStorage.setItem('sm_used',used()+1)}catch(e){}};
+if(location.hash==='#owner'){try{localStorage.removeItem('sm_used')}catch(e){}}
+const left=()=>Math.max(0,FREE_LIMIT-used());
 const st={step:0,cat:null,opt:null,photo:null,photo2:null,style:null};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -140,8 +155,10 @@ function render(){
   $('back').hidden=st.step===0||st.step===4;
   const s=$('screen');
   if(st.step===0){
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step1')}</p><h1>${t('q')}</h1><div class="grid">${Object.entries(CATS).map(([k,v])=>tile(k,v.opts.map(nm).join(' · '),false,v.c)).join('')}</div></div>`;
+    s.innerHTML=`<div style="display:grid;gap:14px"><button class="banner" id="diwali"><span class="em">🪔</span><span><b>${t('banner')}</b><small>${t('bannerSub')}</small></span></button>
+    <p class="steplabel">${t('step1')} · ${left()} ${t('left')}</p><h1>${t('q')}</h1><div class="grid">${Object.entries(CATS).map(([k,v])=>tile(k,v.opts.map(nm).join(' · '),false,v.c)).join('')}</div></div>`;
     s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.cat=b.dataset.v;st.opt=null;st.step=1;render()});
+    $('diwali').onclick=()=>{st.cat='Festival';st.opt='Diwali';st.step=2;render()};
   }else if(st.step===1){
     s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step2')} · ${esc(nm(st.cat))}</p><h1>${t('pick')}</h1><div class="grid">${CATS[st.cat].opts.map(k=>tile(k,t('tap'),st.opt===k,CATS[st.cat].c)).join('')}</div></div>`;
     s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.opt=b.dataset.v;st.step=2;render()});
@@ -238,8 +255,15 @@ async function shareImage(dataUrl){
   // Fallback: open WhatsApp with the message; user attaches the saved image.
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
+function limitScreen(msg){
+  const s=$('screen');$('back').hidden=true;
+  s.innerHTML=`<div style="display:grid;gap:14px"><h1>${msg?t('dailyCap'):t('limitTitle')}</h1>${msg?'':`<p style="margin:0;color:var(--muted)">${t('limitText')}</p>`}
+  <button class="btn ghost" id="again">${t('over')}</button></div>`;
+  $('again').onclick=()=>{Object.assign(st,{step:0,cat:null,opt:null,style:null,photo:null,photo2:null});render()};
+}
 async function generate(){
   const s=$('screen');
+  if(left()<=0)return limitScreen(false);
   $('back').hidden=true;
   s.innerHTML=`<div class="loading"><div class="spin"></div>${t('creating')}<br><small>${t('wait')}</small></div>`;
   try{
@@ -247,7 +271,9 @@ async function generate(){
     const photo2=st.cat==='Couple'&&st.photo2?await shrink(st.photo2):null;
     const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cat:st.cat,opt:st.opt,style:st.style,photo:photo||photo2,photo2:photo&&photo2?photo2:null})});
     const j=await r.json().catch(()=>({}));
+    if(r.status===429)return limitScreen(true);
     if(!r.ok||!j.image)throw new Error(lang==='hi'?t('err'):(j.error||t('err')));
+    addUsed();
     const base=j.image;let cur=await addLabel(base);
     const w=WISHES[st.opt],wish=w&&w[L()];
     s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('done')}</p><h1>${esc(nm(st.opt))} · ${esc(nm(st.style))}</h1>
