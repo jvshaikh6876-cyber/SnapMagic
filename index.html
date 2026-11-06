@@ -79,6 +79,7 @@ details p{font-size:13px;color:var(--muted);margin:8px 0 0}
 <script>
 const CATS={
  Couple:{c:["#ff5e8a","#7b2ff7"],opts:["Romantic","Wedding","Cinematic"]},
+ Product:{c:["#00c2a8","#2b6cff"],opts:["White background","Studio shot","Lifestyle scene","Diwali offer","Instagram post","Nature outdoor"]},
  Boys:{c:["#2b6cff","#00c2a8"],opts:["Stylish","Gym","Luxury"]},
  Girls:{c:["#ff7ac6","#ffb238"],opts:["Fashion","Traditional","Portrait"]},
  Kids:{c:["#4cd4ff","#ffd23f"],opts:["Birthday party","Little superhero","Astronaut","Cricket star","Little prince/princess","Cartoon world"]},
@@ -92,7 +93,7 @@ const CATS={
 const STYLES={"3D Cartoon":["Most popular ⭐","सबसे लोकप्रिय ⭐"],Realistic:["Pro photoshoot look","प्रो फोटोशूट लुक"],Painting:["Oil painting look","ऑयल पेंटिंग लुक"],Anime:["Japanese anime look","जापानी एनीमे लुक"]};
 
 // Hindi names for categories, looks and styles (English is the key).
-const HI={Couple:"कपल",Boys:"लड़के",Girls:"लड़कियाँ",Kids:"बच्चे",Festival:"त्योहार",Group:"ग्रुप / परिवार","Profile Pic":"प्रोफाइल फोटो",Professional:"प्रोफेशनल",Lifestyle:"लाइफस्टाइल",Fantasy:"फैंटेसी",
+const HI={Couple:"कपल",Boys:"लड़के",Girls:"लड़कियाँ",Kids:"बच्चे",Festival:"त्योहार",Group:"ग्रुप / परिवार","Profile Pic":"प्रोफाइल फोटो",Product:"प्रोडक्ट","White background":"सफ़ेद बैकग्राउंड","Studio shot":"स्टूडियो शॉट","Lifestyle scene":"लाइफस्टाइल सीन","Diwali offer":"दिवाली ऑफर","Instagram post":"इंस्टाग्राम पोस्ट","Nature outdoor":"नेचर / आउटडोर",Professional:"प्रोफेशनल",Lifestyle:"लाइफस्टाइल",Fantasy:"फैंटेसी",
  Romantic:"रोमांटिक",Wedding:"शादी",Cinematic:"सिनेमैटिक",Stylish:"स्टाइलिश",Gym:"जिम",Luxury:"लग्ज़री",Fashion:"फैशन",Traditional:"ट्रेडिशनल",Portrait:"पोर्ट्रेट",
  "Birthday party":"बर्थडे पार्टी","Little superhero":"नन्हा सुपरहीरो",Astronaut:"अंतरिक्ष यात्री","Cricket star":"क्रिकेट स्टार","Little prince/princess":"नन्हा राजकुमार/राजकुमारी","Cartoon world":"कार्टून दुनिया",
  Diwali:"दिवाली",Holi:"होली",Eid:"ईद","Raksha Bandhan":"रक्षाबंधन",Navratri:"नवरात्रि","Ganesh Chaturthi":"गणेश चतुर्थी","Independence Day":"स्वतंत्रता दिवस",Christmas:"क्रिसमस",Birthday:"जन्मदिन",
@@ -127,6 +128,9 @@ const TXT={
  foot:["Images are made by AI. Please only upload photos you have permission to use.","फोटो AI से बनती हैं। सिर्फ़ वही फोटो अपलोड करें जिनकी आपको इजाज़त है।"],
  shareText:["Look what I made with SnapMagic! ✨ Make yours free: ","देखो SnapMagic से मैंने क्या बनाया! ✨ आप भी फ्री में बनाओ: "],
  langBtn:["हिंदी","English"],
+ addProduct:["Add your product photo","अपने प्रोडक्ट की फोटो जोड़ें"],productFace:["Use a clear photo of your product","अपने प्रोडक्ट की साफ़ फोटो लगाएं"],productNeed:["A product photo is needed for this","इसके लिए प्रोडक्ट की फोटो ज़रूरी है"],
+ tipProduct:["💡 Best results: one product, fully visible, in good light. The AI keeps your product the same and changes only the background.","💡 बेहतरीन रिज़ल्ट: एक ही प्रोडक्ट, पूरा दिखता हुआ, अच्छी रोशनी में। AI आपका प्रोडक्ट वैसा ही रखेगा, सिर्फ़ बैकग्राउंड बदलेगा।"],
+ shopName:["Your shop name","आपकी दुकान का नाम"],egShop:["e.g. Sharma Sweets","जैसे: शर्मा स्वीट्स"],
  banner:["Make your Diwali card in 1 tap","1 टैप में अपना दिवाली कार्ड बनाएं"],bannerSub:["Add your photo · get a Happy Diwali card to share","अपनी फोटो लगाएं · शेयर करने के लिए दिवाली कार्ड पाएं"],
  limitTitle:["You've used your free images 🎉","आपकी फ्री फोटो खत्म हो गईं 🎉"],
  limitText:["Thanks for trying SnapMagic! More images are coming soon with our app on the Play Store.","SnapMagic आज़माने के लिए धन्यवाद! जल्द ही Play Store पर ऐप के साथ और फोटो बना सकेंगे।"],
@@ -163,7 +167,7 @@ function render(){
     s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step2')} · ${esc(nm(st.cat))}</p><h1>${t('pick')}</h1><div class="grid">${CATS[st.cat].opts.map(k=>tile(k,t('tap'),st.opt===k,CATS[st.cat].c)).join('')}</div></div>`;
     s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.opt=b.dataset.v;st.step=2;render()});
   }else if(st.step===2){
-    const kids=st.cat==='Kids',group=st.cat==='Group',couple=st.cat==='Couple';
+    const kids=st.cat==='Kids',group=st.cat==='Group',couple=st.cat==='Couple',prod=st.cat==='Product';
     const slot=(id,label,img)=>`<div class="drop">${img?`<img src="${img}" alt="">`:''}<b>${label}</b>
       <label class="btn ghost" for="${id}" style="width:auto;padding:10px 14px">${img?t('change'):t('upload')}</label>
       <input id="${id}" type="file" accept="image/*" hidden></div>`;
@@ -172,9 +176,9 @@ function render(){
       title=t('addCouple');tip=t('tipCouple');
       area=`<div class="pair">${slot('file',t('you'),st.photo)}${slot('file2',t('partner'),st.photo2)}</div>`;
     }else{
-      title=kids?t('addChild'):group?t('addGroup'):t('addPhoto');
-      tip=group?t('tipGroup'):t('tipSolo');
-      const [a,b]=kids?[t('childFace'),t('skipChild')]:group?[t('groupFace'),t('skipGroup')]:[t('useFace'),t('skipNew')];
+      title=prod?t('addProduct'):kids?t('addChild'):group?t('addGroup'):t('addPhoto');
+      tip=prod?t('tipProduct'):group?t('tipGroup'):t('tipSolo');
+      const [a,b]=prod?[t('productFace'),t('productNeed')]:kids?[t('childFace'),t('skipChild')]:group?[t('groupFace'),t('skipGroup')]:[t('useFace'),t('skipNew')];
       area=`<div class="drop">${st.photo?`<img src="${st.photo}" alt="">`:`<b>${a}</b><small style="color:var(--muted)">${b}</small>`}
       <label class="btn ghost" for="file" style="width:auto;padding:10px 18px">${st.photo?t('change'):t('upload')}</label>
       <input id="file" type="file" accept="image/*" hidden></div>`;
@@ -183,10 +187,10 @@ function render(){
     s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step3')}</p><h1>${title}</h1>${area}
     <p class="tip">${tip}</p>
     ${kids?`<p class="note" style="text-align:left">${t('kidNote')}</p>`:''}
-    <button class="btn" id="next">${has?t('next'):t('skip')}</button></div>`;
+    <button class="btn" id="next" ${prod&&!has?'disabled style="opacity:.45"':''}>${has?t('next'):t('skip')}</button></div>`;
     $('file').onchange=e=>{const f=e.target.files[0];if(f)readFile(f,d=>{st.photo=d;render()})};
     if($('file2'))$('file2').onchange=e=>{const f=e.target.files[0];if(f)readFile(f,d=>{st.photo2=d;render()})};
-    $('next').onclick=()=>{st.step=3;render()};
+    $('next').onclick=()=>{if(prod&&!has)return;st.step=3;render()};
   }else if(st.step===3){
     const has=st.photo||st.photo2;
     s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step4')}</p><h1>${t('choose')}</h1><div class="grid">${Object.keys(STYLES).map(k=>tile(k,STYLES[k][L()],st.style===k)).join('')}</div>
@@ -198,10 +202,25 @@ function render(){
     generate();
   }
 }
+// Makes the photo smaller and brightens it if it is too dark, so faces come out well lit.
 async function shrink(dataUrl){
   return new Promise(res=>{const im=new Image();im.onload=()=>{const m=1024,r=Math.min(1,m/Math.max(im.width,im.height));
     const c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);
-    c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.88))};im.onerror=()=>res(null);im.src=dataUrl});
+    const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
+    try{
+      const d=x.getImageData(0,0,c.width,c.height),p=d.data;
+      // average brightness, measured on the middle of the photo (where the face usually is)
+      let sum=0,n=0;const x0=Math.floor(c.width*0.25),x1=Math.floor(c.width*0.75),y0=Math.floor(c.height*0.15),y1=Math.floor(c.height*0.65);
+      for(let y=y0;y<y1;y+=4)for(let xx=x0;xx<x1;xx+=4){const i=(y*c.width+xx)*4;sum+=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2];n++}
+      const mean=n?sum/n:128;
+      if(mean<120){
+        const g=Math.max(0.5,Math.min(1,Math.log(135/255)/Math.log(Math.max(mean,8)/255)));
+        const lut=new Uint8ClampedArray(256);for(let v=0;v<256;v++)lut[v]=255*Math.pow(v/255,g);
+        for(let i=0;i<p.length;i+=4){p[i]=lut[p[i]];p[i+1]=lut[p[i+1]];p[i+2]=lut[p[i+2]]}
+        x.putImageData(d,0,0);
+      }
+    }catch(e){}
+    res(c.toDataURL('image/jpeg',0.9))};im.onerror=()=>res(null);im.src=dataUrl});
 }
 const APP_URL='snapmagic-inky.vercel.app';
 // Adds a small app-name label to a corner of the picture.
@@ -219,7 +238,7 @@ function addLabel(src,top){
   };im.onerror=()=>res(src);im.src=src});
 }
 const WISHES={
- Diwali:['Happy Diwali','शुभ दीपावली'],'Family Diwali':['Happy Diwali','शुभ दीपावली'],Holi:['Happy Holi','होली की शुभकामनाएं'],Eid:['Eid Mubarak','ईद मुबारक'],
+ Diwali:['Happy Diwali','शुभ दीपावली'],'Diwali offer':['Happy Diwali','शुभ दीपावली'],'Family Diwali':['Happy Diwali','शुभ दीपावली'],Holi:['Happy Holi','होली की शुभकामनाएं'],Eid:['Eid Mubarak','ईद मुबारक'],
  'Raksha Bandhan':['Happy Raksha Bandhan','रक्षाबंधन की शुभकामनाएं'],Navratri:['Happy Navratri','नवरात्रि की शुभकामनाएं'],'Ganesh Chaturthi':['Ganpati Bappa Morya','गणपति बप्पा मोरया'],
  'Independence Day':['Happy Independence Day','स्वतंत्रता दिवस की शुभकामनाएं'],Christmas:['Merry Christmas','मेरी क्रिसमस'],Birthday:['Happy Birthday','जन्मदिन मुबारक'],'Birthday party':['Happy Birthday','जन्मदिन मुबारक']};
 const isBday=o=>o==='Birthday'||o==='Birthday party';
@@ -280,8 +299,8 @@ async function generate(){
     <img class="result" id="out" alt="">
     ${wish?`<div class="card">
       <b>${t('cardTitle')}</b>
-      <label for="cardname" class="note" style="text-align:left">${isBday(st.opt)?t('bdayName'):t('yourName')}</label>
-      <input id="cardname" maxlength="32" placeholder="${isBday(st.opt)?t('egBday'):t('egName')}">
+      <label for="cardname" class="note" style="text-align:left">${st.cat==='Product'?t('shopName'):isBday(st.opt)?t('bdayName'):t('yourName')}</label>
+      <input id="cardname" maxlength="32" placeholder="${st.cat==='Product'?t('egShop'):isBday(st.opt)?t('egBday'):t('egName')}">
       <button class="btn" id="mkcard">${t('addCard')}: "${wish}"</button>
     </div>`:''}
     <button class="btn wa" id="share">${t('share')}</button>

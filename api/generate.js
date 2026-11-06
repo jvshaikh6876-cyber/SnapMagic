@@ -59,6 +59,14 @@ const PROMPTS = {
     "LinkedIn photo": "a professional headshot, smart formal clothes, plain light grey background, confident friendly smile",
     "Cool avatar": "a fun, stylish avatar portrait with a bold colourful background",
   },
+  Product: {
+    "White background": "a clean professional e-commerce product photo of the product on a pure white background, soft even studio lighting, gentle shadow, like an Amazon or Flipkart listing",
+    "Studio shot": "a premium studio product photo of the product on an elegant pedestal, soft gradient background, dramatic professional lighting, luxury advertisement look",
+    "Lifestyle scene": "the product placed naturally in a beautiful real-life setting where it would be used, warm natural light, stylish modern home",
+    "Diwali offer": "a festive Diwali advertisement photo of the product surrounded by glowing diyas, marigold flowers, rangoli and warm golden lights, rich festive look, space at the bottom for text",
+    "Instagram post": "an eye-catching, trendy Instagram product post, bold colourful aesthetic background with props that match the product, scroll-stopping look",
+    "Nature outdoor": "the product placed outdoors in fresh nature, green leaves, sunlight, natural textures, fresh and clean feel",
+  },
   Kids: {
     "Birthday party": "a happy birthday party for a young child, big colourful cake with candles, balloons, confetti and toys, child in a cute party outfit",
     "Little superhero": "a young child as a cute little superhero in a colourful kid-friendly costume with a small cape, playful heroic pose, bright cartoonish city behind",
@@ -75,19 +83,23 @@ const FRAMING =
 const FRAMING_BY_CAT = {
   Couple: "Frame both people from the waist up, close together, so both faces are large and clear. Relaxed, natural, loving poses. Rich, detailed background. Portrait 4:5 image.",
   Group: "Keep every person from the photo, exactly the same number of people, nobody added or removed. Frame everyone so all faces are clear and visible. Natural, happy poses. Rich, detailed background. Portrait 4:5 image.",
+  Product: "The product is the hero: centred, large, sharp and fully visible, no people. Square 1:1 image.",
   "Profile Pic": "Head-and-shoulders portrait, face centred and large, perfect for a round profile picture crop. Square 1:1 image.",
 };
 
 const STYLES = {
   "3D Cartoon": "3D animated movie style, like a Pixar film, soft lighting, bright cheerful colours",
   Realistic:
-    "professional photoshoot by an expensive portrait photographer, shot on 85mm lens, softly blurred background, soft cinematic lighting, natural skin tones, balanced true-to-life colours with no orange tint, sharp focus on the face, magazine quality",
+    "professional photoshoot by an expensive portrait photographer, shot on 85mm lens, softly blurred background, bright soft key light on the face plus gentle fill light, the face clearly and evenly lit with no dark shadows, natural skin tones, balanced true-to-life colours with no orange tint, sharp focus on the face, magazine quality",
   Painting: "beautiful oil painting style, visible brush strokes, rich colours",
   Anime: "anime illustration style, vibrant colours, clean lines",
 };
 
 const KIDS_SAFETY =
   "This is a young child: keep the child exactly their real age and size, wholesome and age-appropriate, wearing normal fully covering kids' clothing, cheerful innocent mood.";
+
+const LIGHT_FACE =
+  "Lighting: the face must be bright, clearly lit and natural-looking, with healthy skin tones and good contrast, never dark, dull, shadowy or faded, even if the uploaded photo is dark or low quality. Vivid, rich colours.";
 
 const SAFETY =
   "Keep it fully clothed, family-friendly and respectful. No text or watermarks.";
@@ -159,6 +171,7 @@ export default async function handler(req, res) {
   if (slot.code === "ip_cap") return res.status(429).json({ code: "ip_cap", error: "You've used today's free images. Please come back tomorrow!" });
 
   let prompt = `Create ${base}. Style: ${STYLES[style]}. ${FRAMING_BY_CAT[cat] || FRAMING} High quality. ${SAFETY}`;
+  if (cat !== "Product") prompt += " " + LIGHT_FACE;
   if (cat === "Kids") prompt += " " + KIDS_SAFETY;
   const input = [];
 
@@ -168,6 +181,8 @@ export default async function handler(req, res) {
 
   if (photos.length === 2) {
     prompt += " The couple is the person in the first attached photo and the person in the second attached photo. Keep both faces, identities and real ages exactly the same.";
+  } else if (photos.length === 1 && cat === "Product") {
+    prompt += " Use the exact product from the attached photo. Keep its shape, size, colours, label, logo and any text on it exactly the same; only change the background, lighting and setting.";
   } else if (photos.length === 1) {
     prompt += " Use the person (or people) from the attached photo and keep their face, identity and real age exactly the same (a child stays a child).";
   }
