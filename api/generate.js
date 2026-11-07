@@ -180,11 +180,11 @@ export default async function handler(req, res) {
   if (photos.some((m) => !m)) { await slot.undo(); return res.status(400).json({ error: "That photo could not be read. Try a JPG or PNG." }); }
 
   if (photos.length === 2) {
-    prompt += " The couple is the person in the first attached photo and the person in the second attached photo. Keep both faces, identities and real ages exactly the same.";
+    prompt += " The couple is the person in the first attached photo and the person in the second attached photo. Keep both clearly recognisable: same facial features, identities and real ages. Re-light the face so it matches the scene: same light direction, warm glow and colour as the background, soft bright light on the face, natural skin texture and tone. The person must look like they were really photographed in this place, fully blended into one natural photo, never like a face pasted onto another picture.";
   } else if (photos.length === 1 && cat === "Product") {
     prompt += " Use the exact product from the attached photo. Keep its shape, size, colours, label, logo and any text on it exactly the same; only change the background, lighting and setting.";
   } else if (photos.length === 1) {
-    prompt += " Use the person (or people) from the attached photo and keep their face, identity and real age exactly the same (a child stays a child).";
+    prompt += " Use the person (or people) from the attached photo and keep them clearly recognisable: same facial features, identity and real age (a child stays a child). Re-light the face so it matches the scene: same light direction, warm glow and colour as the background, soft bright light on the face, natural skin texture and tone. The person must look like they were really photographed in this place, fully blended into one natural photo, never like a face pasted onto another picture.";
   }
   input.push({ type: "text", text: prompt });
   photos.forEach((m) => input.push({ type: "image", mime_type: m[1], data: m[2] }));

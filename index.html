@@ -121,7 +121,7 @@ const TXT={
  creating:["Creating your image…","आपकी फोटो बन रही है…"],wait:["This takes about 10–20 seconds","इसमें 10–20 सेकंड लगते हैं"],
  done:["Done","तैयार"],cardTitle:["💌 Make it a greeting card","💌 ग्रीटिंग कार्ड बनाएं"],yourName:["Your name","आपका नाम"],bdayName:["Birthday person's name","जिसका जन्मदिन है, उसका नाम"],
  egName:["e.g. Javed & Family","जैसे: जावेद और परिवार"],egBday:["e.g. Aarav","जैसे: आरव"],addCard:["Add card","कार्ड जोड़ें"],update:["Update card","कार्ड बदलें"],
- share:["Share on WhatsApp","व्हाट्सएप पर शेयर करें"],save:["Save image","फोटो सेव करें"],hold:["On phone: you can also press and hold the image to save it.","फोन पर: फोटो को दबाकर रखें और सेव करें।"],
+ share:["Share on WhatsApp","व्हाट्सएप पर शेयर करें"],save:["Save image","फोटो सेव करें"],hold:["Tap Save image, then choose \"Save Image\" to put it in your gallery. You can also press and hold the picture.","सेव पर टैप करें, फिर \"Save Image\" चुनें, फोटो गैलरी में आ जाएगी। या फोटो को दबाकर रखें।"],
  regen:["🔄 Generate again","🔄 फिर से बनाएं"],diff:["Try a different style","दूसरा स्टाइल आज़माएं"],over:["Start over","शुरू से करें"],
  fail:["Couldn't make it","फोटो नहीं बन पाई"],tryAgain:["Try again","फिर कोशिश करें"],back:["Back","पीछे"],
  err:["Something went wrong. Please try again.","कुछ गड़बड़ हो गई। कृपया फिर कोशिश करें।"],
@@ -202,25 +202,36 @@ function render(){
     generate();
   }
 }
-// Makes the photo smaller and brightens it if it is too dark, so faces come out well lit.
+// Makes the photo smaller and gently enhances every upload (clearer, brighter face),
+// with a stronger lift for dark photos.
 async function shrink(dataUrl){
   return new Promise(res=>{const im=new Image();im.onload=()=>{const m=1024,r=Math.min(1,m/Math.max(im.width,im.height));
     const c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);
     const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
     try{
       const d=x.getImageData(0,0,c.width,c.height),p=d.data;
-      // average brightness, measured on the middle of the photo (where the face usually is)
-      let sum=0,n=0;const x0=Math.floor(c.width*0.25),x1=Math.floor(c.width*0.75),y0=Math.floor(c.height*0.15),y1=Math.floor(c.height*0.65);
-      for(let y=y0;y<y1;y+=4)for(let xx=x0;xx<x1;xx+=4){const i=(y*c.width+xx)*4;sum+=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2];n++}
-      const mean=n?sum/n:128;
-      if(mean<120){
-        const g=Math.max(0.5,Math.min(1,Math.log(135/255)/Math.log(Math.max(mean,8)/255)));
-        const lut=new Uint8ClampedArray(256);for(let v=0;v<256;v++)lut[v]=255*Math.pow(v/255,g);
-        for(let i=0;i<p.length;i+=4){p[i]=lut[p[i]];p[i+1]=lut[p[i+1]];p[i+2]=lut[p[i+2]]}
-        x.putImageData(d,0,0);
+      // brightness histogram (whole photo) + average of the middle area (face)
+      const hist=new Uint32Array(256);let fs=0,fn=0;
+      const x0=c.width*0.25,x1=c.width*0.75,y0=c.height*0.15,y1=c.height*0.65;
+      for(let i=0,k=0;i<p.length;i+=4,k++){const l=(0.299*p[i]+0.587*p[i+1]+0.114*p[i+2])|0;hist[l]++;
+        const xx=k%c.width,yy=(k/c.width)|0;if(xx>x0&&xx<x1&&yy>y0&&yy<y1){fs+=l;fn++}}
+      const total=c.width*c.height;let acc=0,lo=0,hi=255;
+      for(let v=0;v<256;v++){acc+=hist[v];if(acc>total*0.01){lo=v;break}}
+      acc=0;for(let v=255;v>=0;v--){acc+=hist[v];if(acc>total*0.01){hi=v;break}}
+      if(hi-lo<40){lo=0;hi=255}
+      const face=fn?fs/fn:128;
+      // target face brightness ~145; never darken, max strong lift for dark photos
+      const g=face<145?Math.max(0.55,Math.min(1,Math.log(145/255)/Math.log(Math.max(face,8)/255))):1;
+      const lut=new Uint8ClampedArray(256);
+      for(let v=0;v<256;v++){let t=Math.min(1,Math.max(0,(v-lo)/Math.max(1,hi-lo)));t=Math.pow(t,g);lut[v]=Math.round(255*t)}
+      const sat=1.08;
+      for(let i=0;i<p.length;i+=4){
+        let R=lut[p[i]],G=lut[p[i+1]],B=lut[p[i+2]];const L=0.299*R+0.587*G+0.114*B;
+        p[i]=L+(R-L)*sat;p[i+1]=L+(G-L)*sat;p[i+2]=L+(B-L)*sat;
       }
+      x.putImageData(d,0,0);
     }catch(e){}
-    res(c.toDataURL('image/jpeg',0.9))};im.onerror=()=>res(null);im.src=dataUrl});
+    res(c.toDataURL('image/jpeg',0.92))};im.onerror=()=>res(null);im.src=dataUrl});
 }
 const APP_URL='snapmagic-inky.vercel.app';
 // Adds a small app-name label to a corner of the picture.
@@ -265,6 +276,14 @@ async function makeCard(src,wish,name,bday){
   };im.onerror=()=>res(src);im.src=src});
 }
 async function toFile(dataUrl){const b=await (await fetch(dataUrl)).blob();return new File([b],'snapmagic.jpg',{type:'image/jpeg'})}
+// Save: on phones open the share sheet so "Save Image" puts it in the Photos gallery.
+async function saveImage(dataUrl){
+  try{
+    const file=await toFile(dataUrl);
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+  const a=document.createElement('a');a.href=dataUrl;a.download='snapmagic.jpg';document.body.appendChild(a);a.click();a.remove();
+}
 async function shareImage(dataUrl){
   const text=t('shareText')+'https://'+APP_URL;
   try{
@@ -304,12 +323,13 @@ async function generate(){
       <button class="btn" id="mkcard">${t('addCard')}: "${wish}"</button>
     </div>`:''}
     <button class="btn wa" id="share">${t('share')}</button>
-    <a class="btn ghost" id="save" download="snapmagic.jpg">${t('save')}</a>
+    <button class="btn ghost" id="save">${t('save')}</button>
     <p class="note">${t('hold')}</p>
     <button class="btn ghost" id="regen">${t('regen')}</button>
     <button class="btn ghost" id="same">${t('diff')}</button>
     <button class="btn ghost" id="again">${t('over')}</button></div>`;
-    const show=src=>{cur=src;$('out').src=src;$('save').href=src};
+    const show=src=>{cur=src;$('out').src=src};
+    $('save').onclick=()=>saveImage(cur);
     show(cur);
     $('share').onclick=()=>shareImage(cur);
     $('regen').onclick=()=>generate();
