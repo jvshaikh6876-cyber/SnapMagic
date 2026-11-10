@@ -101,6 +101,11 @@ const KIDS_SAFETY =
 const LIGHT_FACE =
   "Lighting: the face must be bright, clearly lit and natural-looking, with healthy skin tones and good contrast, never dark, dull, shadowy or faded, even if the uploaded photo is dark or low quality. Vivid, rich colours.";
 
+// Festive, wedding and traditional looks: fully dressed up, never plain or unfinished.
+const FESTIVE_STYLE =
+  "Make the look fully dressed up and finished, like a professional festive photoshoot. If the person is a woman: an elegant silk saree, lehenga or anarkali with rich embroidery, traditional gold jewellery (jhumka earrings, necklace, bangles), a small bindi, beautifully styled hair with a flower gajra, and soft festive makeup. If the person is a man: a rich embroidered kurta or sherwani with fine details, neatly styled hair and beard, optionally a watch or bracelet. Kids: cute festive traditional outfits.";
+const FESTIVE_LOOKS = { Festival: true, Group: ["Family Diwali", "Family portrait"], Couple: ["Wedding"], Girls: ["Traditional"] };
+
 const SAFETY =
   "Keep it fully clothed, family-friendly and respectful. No text or watermarks.";
 
@@ -172,6 +177,8 @@ export default async function handler(req, res) {
 
   let prompt = `Create ${base}. Style: ${STYLES[style]}. ${FRAMING_BY_CAT[cat] || FRAMING} High quality. ${SAFETY}`;
   if (cat !== "Product") prompt += " " + LIGHT_FACE;
+  const fl = FESTIVE_LOOKS[cat];
+  if (fl === true || (Array.isArray(fl) && fl.includes(opt))) prompt += " " + FESTIVE_STYLE;
   if (cat === "Kids") prompt += " " + KIDS_SAFETY;
   const input = [];
 
@@ -179,6 +186,9 @@ export default async function handler(req, res) {
   const photos = [photo, photo2].filter(Boolean).map(readPhoto);
   if (photos.some((m) => !m)) { await slot.undo(); return res.status(400).json({ error: "That photo could not be read. Try a JPG or PNG." }); }
 
+  if (photos.length === 0 && cat !== "Product") {
+    prompt += " The person (or people) should be Indian, with natural Indian features and skin tone.";
+  }
   if (photos.length === 2) {
     prompt += " The couple is the person in the first attached photo and the person in the second attached photo. Keep both clearly recognisable: same facial features, identities and real ages. Re-light the face so it matches the scene: same light direction, warm glow and colour as the background, soft bright light on the face, natural skin texture and tone. The person must look like they were really photographed in this place, fully blended into one natural photo, never like a face pasted onto another picture.";
   } else if (photos.length === 1 && cat === "Product") {
