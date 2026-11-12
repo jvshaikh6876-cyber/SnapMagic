@@ -1,99 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <title>SnapMagic</title>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Hind:wght@500;600;700&family=Manrope:wght@400;600;700&display=swap">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="SnapMagic turns your photo into a festive photoshoot, 3D cartoon or greeting card. No typing, about 20 seconds.">
+<meta name="theme-color" content="#0B0810">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Hind:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one phone-width app column, step-by-step screens with a progress strip on top */
+/* SnapMagic "dark premium": one phone-width column, step-by-step screens. */
 :root{
-  --bg:#1a1426; --panel:#251c36; --line:#3a2e52; --fg:#f4eefb; --muted:#b4a7c9;
-  --accent:#ffb238; --accent-ink:#2a1a00;
-  --display:"Bricolage Grotesque","Hind",ui-sans-serif,system-ui,sans-serif;
-  --body:"Manrope","Hind",ui-sans-serif,system-ui,sans-serif;
+  --bg:#0B0810; --surface:#16111D; --line:#2A2233; --goldline:#3A2E1E;
+  --fg:#F6EFE3; --muted:#B3A795; --soft:#D8CDBC;
+  --gold:#E0B25A; --gold-hi:#F2CF86; --gold-ink:#1E1405;
+  --wa:#25D366; --wa-ink:#06351B;
+  --display:"Bricolage Grotesque","Hind","Noto Sans Devanagari",ui-sans-serif,system-ui,sans-serif;
+  --body:"Manrope","Hind","Noto Sans Devanagari",ui-sans-serif,system-ui,sans-serif;
   color-scheme:dark;
 }
-html,body{background:var(--bg);color:var(--fg)}
-body{font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.app{max-width:440px;margin:0 auto;padding-block:20px 40px;display:flex;flex-direction:column;gap:18px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.logo{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em}
-.logo span{color:var(--accent)}
-.back{background:none;border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:6px 14px;font:600 13px var(--body);cursor:pointer}
-.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.steps i{height:4px;border-radius:4px;background:var(--line)}
-.steps i.on{background:var(--accent)}
-.steplabel{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
-h1{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.02em}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tile{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 14px;text-align:left;color:var(--fg);cursor:pointer;display:flex;flex-direction:column;gap:4px;font:inherit;min-height:92px}
-.tile b{font-family:var(--display);font-size:18px;font-weight:600}
-.tile small{color:var(--muted);font-size:12.5px}
-.tile .sw{height:6px;width:40px;border-radius:6px;margin-bottom:6px}
-.tile:hover,.tile:focus-visible{border-color:var(--accent);outline:none}
-.tile.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
-.drop{border:2px dashed var(--line);border-radius:18px;padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
-.drop img{width:120px;height:120px;object-fit:cover;border-radius:50%}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.pair .drop{padding:18px 10px}
-.pair .drop img{width:88px;height:88px}
-.banner{display:flex;align-items:center;gap:12px;text-align:left;width:100%;cursor:pointer;border:0;border-radius:18px;padding:16px;color:#2a1200;background:linear-gradient(120deg,#ffb238,#ff7a3d 60%,#e52e71);font:inherit}
-.banner span.em{font-size:34px;line-height:1}
-.banner b{display:block;font-family:var(--display);font-size:19px;line-height:1.15}
-.banner small{display:block;font-size:13px;opacity:.85;margin-top:2px}
-.banner:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
-.hdr-r{display:flex;gap:8px;align-items:center}
-.tip{font-size:13px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0}
-.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:15px;font:700 16px var(--body);cursor:pointer;width:100%}
-.btn.ghost{background:none;color:var(--fg);border:1px solid var(--line)}
-.btn:focus-visible,.back:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}
-div.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:8px}
-input#cardname{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px;font:600 15px var(--body)}
-input#cardname:focus{outline:2px solid var(--accent)}
-button.wa{background:#25d366;color:#06351b}
-img.result{width:100%;max-width:100%;border-radius:18px;display:block;background:var(--panel)}
-.err{background:#3a1a24;border:1px solid #7a2a3c;border-radius:14px;padding:14px;color:#ffd6de}
-a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box}
-.loading{text-align:center;padding:60px 0;color:var(--muted)}
-.spin{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;margin:0 auto 14px;animation:s 1s linear infinite}
-@keyframes s{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.spin{animation:none}}
-details{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-summary{cursor:pointer;font-weight:700;font-size:13px}
-details p{font-size:13px;color:var(--muted);margin:8px 0 0}
-.note{font-size:12px;color:var(--muted);text-align:center;margin:0}
-</style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:15px;line-height:1.5;min-height:100vh;
+  background:radial-gradient(520px 320px at 50% -80px,rgba(224,178,90,.10),transparent 70%),var(--bg);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:not-allowed;opacity:.45}
+[hidden]{display:none!important}
+svg{flex:none;display:block}
+h1,h2,p{margin:0}
+:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
+.app{max-width:440px;margin:0 auto;padding-block:20px 36px;display:flex;flex-direction:column;gap:20px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.hdr-l,.hdr-r{display:flex;gap:8px;align-items:center}
+.logo{font-family:var(--display);font-weight:800;font-size:25px;letter-spacing:-.02em;line-height:1}
+.logo span{color:var(--gold)}
+.pill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:7px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--goldline);color:var(--gold);white-space:nowrap}
+.lang{font-weight:600;font-size:13px;padding:0 14px;min-height:44px;border-radius:999px;background:transparent;border:1px solid var(--line)}
+.round{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center;padding:0}
+.lang:hover,.round:hover{border-color:var(--gold)}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;flex:1;max-width:170px}
+.steps i{height:4px;border-radius:4px;background:var(--line)}
+.steps i.on{background:var(--gold)}
+
+.screen{display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+h1{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.08;letter-spacing:-.025em;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:23px;letter-spacing:-.01em;line-height:1.15}
+.head{display:flex;flex-direction:column;gap:6px}
+.sub{font-size:13px;color:var(--muted)}
+:lang(hi) h1,:lang(hi) h2{letter-spacing:0;line-height:1.25}
+:lang(hi) .eyebrow{letter-spacing:.04em}
+
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:54px;padding:10px 16px;border:0;border-radius:16px;background:var(--gold);color:var(--gold-ink);font-weight:700;font-size:16px;text-decoration:none;text-align:center;line-height:1.2;transition:transform .12s,background .15s}
+.btn:hover:not(:disabled){background:var(--gold-hi)}
+.btn:active:not(:disabled){transform:scale(.985)}
+.btn.big{min-height:58px;border-radius:18px;font-size:17px}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line);font-weight:600;font-size:14px;min-height:48px;border-radius:14px}
+.btn.ghost:hover:not(:disabled){background:var(--surface);border-color:var(--gold)}
+.btn.wa{background:var(--wa);color:var(--wa-ink);font-size:15px}
+.btn.wa:hover{background:#3BE07A}
+.btn.sm{font-size:15px}
+.link{background:none;border:0;color:var(--gold);font-weight:700;font-size:14px;min-height:44px;padding:8px 10px;border-radius:10px;align-self:center}
+.link:hover{color:var(--gold-hi)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.note{font-size:12px;color:var(--muted);text-align:center}
+
+/* Hero */
+.hero{border-radius:28px;padding:1px;background:linear-gradient(160deg,#6B5326,var(--line) 45%,var(--line))}
+.hero-in{border-radius:27px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:16px}
+.ba{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;position:relative}
+.ph{position:relative;height:220px;border-radius:18px;overflow:hidden;background:#201829}
+.ph img{width:100%;height:112%;object-fit:cover;display:block}
+.tag{position:absolute;top:10px;font-weight:700;font-size:10px;letter-spacing:.12em;padding:5px 9px;border-radius:999px;line-height:1.3}
+.tag.b{left:10px;background:rgba(11,8,16,.72);color:var(--fg)}
+.tag.a{right:10px;background:var(--gold);color:var(--gold-ink)}
+.arrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--gold-ink);border:3px solid var(--surface);display:flex;align-items:center;justify-content:center}
+.hero h1{font-size:32px;line-height:1.05}
+.hero h1 em{font-style:normal;color:var(--gold);white-space:nowrap}
+.hero p{font-size:14px;line-height:1.55;color:var(--muted)}
+.hero .txt{display:flex;flex-direction:column;gap:8px}
+
+/* Picture tiles */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pic{position:relative;height:200px;padding:0;border:0;border-radius:22px;overflow:hidden;background:var(--surface);text-align:left;display:block;width:100%}
+.pic img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.pic:hover img{transform:scale(1.04)}
+.pic .cap{position:absolute;inset:auto 0 0 0;padding:44px 12px 12px;background:linear-gradient(to top,rgba(11,8,16,.96) 32%,rgba(11,8,16,0));display:flex;flex-direction:column;gap:2px}
+.pic b{font-family:var(--display);font-weight:700;font-size:18px;line-height:1.2;color:var(--fg)}
+.pic small{font-weight:600;font-size:11px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{position:absolute;top:10px;left:10px;font-weight:700;font-size:10px;letter-spacing:.08em;padding:5px 9px;border-radius:999px;background:var(--gold);color:var(--gold-ink);line-height:1.3}
+.badge.ivory{background:var(--fg);color:var(--bg)}
+.pic::after{content:"";position:absolute;inset:0;border-radius:22px;border:1px solid rgba(246,239,227,.08);pointer-events:none}
+.pic:focus-visible{outline-offset:3px}
+.more{display:flex;flex-direction:column;gap:10px}
+.more .sub{font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:11px}
+:lang(hi) .more .sub{letter-spacing:.03em}
+.mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mini{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:104px;padding:12px;border-radius:18px;border:1px solid var(--line);text-align:left;color:var(--fg);
+  background:linear-gradient(150deg,rgba(224,178,90,.16),rgba(123,47,247,.10) 55%,rgba(22,17,29,1)) , var(--surface)}
+.mini:hover{border-color:var(--gold)}
+.mini .ico{width:34px;height:34px;border-radius:11px;background:rgba(11,8,16,.55);color:var(--gold);display:flex;align-items:center;justify-content:center}
+.mini b{font-family:var(--display);font-weight:700;font-size:14px;line-height:1.15;overflow-wrap:anywhere}
+.mini small{font-size:11px;font-weight:600;color:var(--muted);margin-top:-6px}
+
+/* Look picker */
+.lookhead{position:relative;border-radius:22px;overflow:hidden;min-height:128px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:16px;border:1px solid var(--line);
+  background:linear-gradient(150deg,rgba(224,178,90,.18),rgba(123,47,247,.12) 55%,var(--surface)),var(--surface)}
+.lookhead img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5}
+.lookhead::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(11,8,16,.96) 18%,rgba(11,8,16,.35))}
+.lookhead>*:not(img){position:relative;z-index:2}
+.look{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:62px;padding:12px 12px 12px 14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:left;color:var(--fg)}
+.look b{font-family:var(--display);font-weight:600;font-size:16px;line-height:1.2}
+.look svg{color:var(--muted)}
+.look:hover{border-color:var(--gold)}
+.look:hover svg{color:var(--gold)}
+.look.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.look.sel svg{color:var(--gold)}
+
+/* Upload */
+.drop{border:1.5px dashed #453a55;border-radius:22px;padding:26px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;background:rgba(22,17,29,.6)}
+.drop .ico{width:56px;height:56px;border-radius:50%;background:var(--surface);border:1px solid var(--goldline);color:var(--gold);display:flex;align-items:center;justify-content:center}
+.drop img{width:124px;height:124px;object-fit:cover;border-radius:50%;border:2px solid var(--gold)}
+.drop b{font-family:var(--display);font-weight:600;font-size:17px;line-height:1.25}
+.drop small{color:var(--muted);font-size:13px}
+.drop label.btn{width:auto;min-height:46px;padding:8px 18px;cursor:pointer;margin-top:4px;color:var(--gold);border-color:var(--gold)}
+.vh:focus-visible+label{outline:2px solid var(--fg);outline-offset:2px}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pair .drop{padding:18px 8px}
+.pair .drop img{width:88px;height:88px}
+.pair .drop .ico{width:48px;height:48px}
+.pair .drop label.btn{padding:8px 12px;font-size:13px}
+.tip{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--soft);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.tip svg{color:var(--gold);margin-top:2px}
+.tip.plain{background:none;border:0;padding:0 2px;color:var(--muted);font-size:12px}
+.tip.plain svg{color:var(--muted)}
+
+/* Style cards */
+.style{position:relative;display:flex;flex-direction:column;gap:6px;padding:6px 6px 12px;border-radius:22px;background:var(--surface);border:2px solid var(--line);text-align:left;color:var(--fg)}
+.style .ph{display:block;height:190px;border-radius:16px;margin-bottom:2px}
+.style b{font-family:var(--display);font-weight:700;font-size:16px;padding:0 6px;line-height:1.2}
+.style small{font-weight:600;font-size:11px;color:var(--muted);padding:0 6px}
+.style small.pop{color:var(--gold);font-weight:700}
+.style:hover{border-color:#5a4a2c}
+.style.sel{border-color:var(--gold)}
+.style .tick{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:none;align-items:center;justify-content:center}
+.style.sel .tick{display:flex}
+.ready{display:flex;align-items:center;gap:12px;padding:8px 6px 8px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.ready img,.ready .ico{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none}
+.ready .ico{background:var(--bg);border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center}
+.ready div{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.ready b{font-size:14px;font-weight:700;line-height:1.3}
+.ready small{font-size:12px;color:var(--muted);line-height:1.35}
+.ready .link{font-size:13px}
+.cta{display:flex;flex-direction:column;gap:10px}
+
+/* Result */
+.okline{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;color:#8FE0B0}
+.frame{border-radius:26px;overflow:hidden;border:1px solid var(--goldline);background:var(--surface)}
+img.result{width:100%;display:block;min-height:120px}
+.cardbox{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:20px;background:var(--surface);border:1px solid var(--line)}
+.cardbox>b{font-family:var(--display);font-weight:700;font-size:16px}
+.cardbox label{font-size:12px;color:var(--muted)}
+.row{display:flex;gap:8px}
+.row input{flex:1;min-width:0;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-weight:600;font-size:15px}
+.row input::placeholder{color:#7d7287;font-weight:500}
+.row input:focus{outline:2px solid var(--gold);outline-offset:0;border-color:var(--gold)}
+.row button{min-height:46px;padding:0 16px;border-radius:12px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-weight:700;font-size:14px}
+.row button:hover{background:rgba(224,178,90,.12)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-weight:600;font-size:13px;min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg)}
+.chip:hover{border-color:var(--gold)}
+.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--gold-ink);font-weight:700}
+
+/* Loading, error, limit */
+.loading{text-align:center;padding:72px 0 60px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:8px}
+.loading b{font-family:var(--display);font-weight:800;font-size:24px;color:var(--fg);letter-spacing:-.02em}
+.spin{width:52px;height:52px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;margin-bottom:14px;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.err{background:#2A1219;border:1px solid #6E2A3A;border-radius:14px;padding:14px;color:#FFD6DE;font-size:14px}
+.msg{display:flex;flex-direction:column;gap:14px;padding:28px 18px;border-radius:24px;background:var(--surface);border:1px solid var(--goldline);text-align:center;align-items:center}
+.msg .ico{width:56px;height:56px;border-radius:50%;background:var(--bg);border:1px solid var(--goldline);color:var(--gold);display:flex;align-items:center;justify-content:center}
+.msg h1{font-size:25px}
+.msg p{color:var(--muted);font-size:14px}
+.foot{font-size:12px;color:var(--muted);text-align:center;padding:0 8px}
+
+.screen>*{animation:rise .28s ease backwards}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .pic:hover img{transform:none}
+}
+@media (max-width:359px){
+  h1{font-size:26px}.hero h1{font-size:27px}.ph{height:190px}.pic{height:176px}.style .ph{height:160px}
+  .logo{font-size:22px}.mini-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (min-width:700px){.app{padding-block:32px 48px}}
+</style>
+</head>
+<body>
 <div class="app">
   <header>
-    <div class="logo">Snap<span>Magic</span></div>
+    <div class="hdr-l">
+      <button class="round" id="back" hidden></button>
+      <div class="logo" id="logo">Snap<span>Magic</span></div>
+    </div>
+    <div class="steps" id="steps" role="img" hidden><i></i><i></i><i></i><i></i></div>
     <div class="hdr-r">
-      <button class="back" id="lang" aria-label="Change language">हिंदी</button>
-      <button class="back" id="back" hidden>Back</button>
+      <span class="pill" id="pill"></span>
+      <button class="lang" id="lang" aria-label="Change language">हिंदी</button>
     </div>
   </header>
-  <div class="steps" id="steps"><i></i><i></i><i></i><i></i><i></i></div>
-  <main id="screen"></main>
-  <p class="note" id="foot"></p>
+  <main id="screen" class="screen"></main>
+  <p class="foot" id="foot"></p>
 </div>
 
 <script>
 const CATS={
- Couple:{c:["#ff5e8a","#7b2ff7"],opts:["Romantic","Wedding","Cinematic"]},
- Product:{c:["#00c2a8","#2b6cff"],opts:["White background","Studio shot","Lifestyle scene","Diwali offer","Instagram post","Nature outdoor"]},
- Boys:{c:["#2b6cff","#00c2a8"],opts:["Stylish","Gym","Luxury"]},
- Girls:{c:["#ff7ac6","#ffb238"],opts:["Fashion","Traditional","Portrait"]},
- Kids:{c:["#4cd4ff","#ffd23f"],opts:["Birthday party","Little superhero","Astronaut","Cricket star","Little prince/princess","Cartoon world"]},
- Festival:{c:["#ff8a00","#e52e71"],opts:["Diwali","Holi","Eid","Raksha Bandhan","Navratri","Ganesh Chaturthi","Independence Day","Christmas","Birthday"]},
- Group:{c:["#00c2a8","#ffd23f"],opts:["Family portrait","Family Diwali","Friends trip","Office team","Party","Movie poster"]},
- "Profile Pic":{c:["#7b2ff7","#ff7ac6"],opts:["WhatsApp DP","Instagram DP","LinkedIn photo","Cool avatar"]},
- Professional:{c:["#3a7bd5","#9aa8bd"],opts:["Business","LinkedIn","Office"]},
- Lifestyle:{c:["#ffb238","#ff5e3a"],opts:["Luxury car","Travel","Rich lifestyle"]},
- Fantasy:{c:["#7b2ff7","#00d4ff"],opts:["Anime","Superhero","Fantasy"]}
+ Couple:{opts:["Romantic","Wedding","Cinematic"]},
+ Product:{opts:["White background","Studio shot","Lifestyle scene","Diwali offer","Instagram post","Nature outdoor"]},
+ Boys:{opts:["Stylish","Gym","Luxury"]},
+ Girls:{opts:["Fashion","Traditional","Portrait"]},
+ Kids:{opts:["Birthday party","Little superhero","Astronaut","Cricket star","Little prince/princess","Cartoon world"]},
+ Festival:{opts:["Diwali","Holi","Eid","Raksha Bandhan","Navratri","Ganesh Chaturthi","Independence Day","Christmas","Birthday"]},
+ Group:{opts:["Family portrait","Family Diwali","Friends trip","Office team","Party","Movie poster"]},
+ "Profile Pic":{opts:["WhatsApp DP","Instagram DP","LinkedIn photo","Cool avatar"]},
+ Professional:{opts:["Business","LinkedIn","Office"]},
+ Lifestyle:{opts:["Luxury car","Travel","Rich lifestyle"]},
+ Fantasy:{opts:["Anime","Superhero","Fantasy"]}
 };
-const STYLES={"3D Cartoon":["Most popular ⭐","सबसे लोकप्रिय ⭐"],Realistic:["Pro photoshoot look","प्रो फोटोशूट लुक"],Painting:["Oil painting look","ऑयल पेंटिंग लुक"],Anime:["Japanese anime look","जापानी एनीमे लुक"]};
+const STYLES={"3D Cartoon":["Most popular","सबसे लोकप्रिय"],Realistic:["Pro photoshoot look","प्रो फोटोशूट लुक"],Painting:["Oil painting look","ऑयल पेंटिंग लुक"],Anime:["Japanese anime look","जापानी एनीमे लुक"]};
+
+// Home screen pictures: [file, crop position, short line EN, short line HI, badge]
+const PICS={
+ Festival:["03-diwali-cartoon","50% 18%","Diwali · Holi · Eid +6","दिवाली · होली · ईद +6","trending"],
+ Couple:["06-couple-wedding","50% 20%","Wedding · Romantic","शादी · रोमांटिक"],
+ Product:["12-product-studio","60% 40%","For shops & sellers","दुकानदारों के लिए","business"],
+ Kids:["07-kids-superhero","50% 15%","Superhero · Astronaut","सुपरहीरो · अंतरिक्ष यात्री"],
+ Group:["10-group-family","50% 30%","Family Diwali · Friends","फैमिली दिवाली · दोस्त"],
+ Girls:["09-girls-traditional","50% 15%","Traditional · Fashion","ट्रेडिशनल · फैशन"],
+ Boys:["08-boys-luxury","50% 25%","Luxury · Stylish · Gym","लग्ज़री · स्टाइलिश · जिम"],
+ "Profile Pic":["11-profile-insta","50% 20%","WhatsApp · Instagram DP","व्हाट्सएप · इंस्टाग्राम DP"]
+};
+const MINI={Professional:"case",Lifestyle:"gem",Fantasy:"wand"};
+const STYLE_PICS={"3D Cartoon":["03-diwali-cartoon","50% 0%"],Realistic:["02-diwali-realistic","55% 0%"],Painting:["04-diwali-painting","55% 0%"],Anime:["05-diwali-anime","50% 0%"]};
+const pic=f=>`samples/${f}.jpg`;
 
 // Hindi names for categories, looks and styles (English is the key).
-const HI={Couple:"कपल",Boys:"लड़के",Girls:"लड़कियाँ",Kids:"बच्चे",Festival:"त्योहार",Group:"ग्रुप / परिवार","Profile Pic":"प्रोफाइल फोटो",Product:"प्रोडक्ट","White background":"सफ़ेद बैकग्राउंड","Studio shot":"स्टूडियो शॉट","Lifestyle scene":"लाइफस्टाइल सीन","Diwali offer":"दिवाली ऑफर","Instagram post":"इंस्टाग्राम पोस्ट","Nature outdoor":"नेचर / आउटडोर",Professional:"प्रोफेशनल",Lifestyle:"लाइफस्टाइल",Fantasy:"फैंटेसी",
+const HI={Couple:"कपल",Boys:"लड़के",Girls:"लड़कियाँ",Kids:"बच्चे",Festival:"त्योहार",Group:"परिवार और ग्रुप","Profile Pic":"प्रोफाइल फोटो",Product:"प्रोडक्ट","White background":"सफ़ेद बैकग्राउंड","Studio shot":"स्टूडियो शॉट","Lifestyle scene":"लाइफस्टाइल सीन","Diwali offer":"दिवाली ऑफर","Instagram post":"इंस्टाग्राम पोस्ट","Nature outdoor":"नेचर / आउटडोर",Professional:"प्रोफेशनल",Lifestyle:"लाइफस्टाइल",Fantasy:"फैंटेसी",
  Romantic:"रोमांटिक",Wedding:"शादी",Cinematic:"सिनेमैटिक",Stylish:"स्टाइलिश",Gym:"जिम",Luxury:"लग्ज़री",Fashion:"फैशन",Traditional:"ट्रेडिशनल",Portrait:"पोर्ट्रेट",
  "Birthday party":"बर्थडे पार्टी","Little superhero":"नन्हा सुपरहीरो",Astronaut:"अंतरिक्ष यात्री","Cricket star":"क्रिकेट स्टार","Little prince/princess":"नन्हा राजकुमार/राजकुमारी","Cartoon world":"कार्टून दुनिया",
  Diwali:"दिवाली",Holi:"होली",Eid:"ईद","Raksha Bandhan":"रक्षाबंधन",Navratri:"नवरात्रि","Ganesh Chaturthi":"गणेश चतुर्थी","Independence Day":"स्वतंत्रता दिवस",Christmas:"क्रिसमस",Birthday:"जन्मदिन",
@@ -101,76 +261,139 @@ const HI={Couple:"कपल",Boys:"लड़के",Girls:"लड़किया
  "WhatsApp DP":"व्हाट्सएप DP","Instagram DP":"इंस्टाग्राम DP","LinkedIn photo":"लिंक्डइन फोटो","Cool avatar":"कूल अवतार",
  Business:"बिज़नेस",LinkedIn:"लिंक्डइन",Office:"ऑफिस","Luxury car":"लग्ज़री कार",Travel:"ट्रैवल","Rich lifestyle":"रिच लाइफस्टाइल",Anime:"एनीमे",Superhero:"सुपरहीरो",
  "3D Cartoon":"3D कार्टून",Realistic:"रियलिस्टिक",Painting:"पेंटिंग"};
+const EN={Group:"Family & Group"}; // nicer English display names (the key sent to the server stays the same)
 
 const TXT={
- step1:["Step 1 of 4","स्टेप 1 / 4"],q:["What do you want to create?","आप क्या बनाना चाहते हैं?"],
- step2:["Step 2 of 4","स्टेप 2 / 4"],pick:["Pick a look","लुक चुनें"],tap:["Tap to choose","चुनने के लिए टैप करें"],
- step3:["Step 3 of 4 · Optional","स्टेप 3 / 4 · ज़रूरी नहीं"],
+ eyebrow:["No typing · 20 seconds","बिना टाइपिंग · 20 सेकंड"],
+ h1a:["Your photo.","आपकी फोटो।"],h1b:["Any look.","कोई भी लुक।"],h1c:["One tap.","बस एक टैप।"],
+ heroSub:["Turn an everyday selfie into a festive photoshoot, a 3D cartoon or a greeting card.","अपनी रोज़ की सेल्फ़ी को त्योहार वाले फोटोशूट, 3D कार्टून या ग्रीटिंग कार्ड में बदलें।"],
+ cta:["Try it with your photo","अपनी फोटो से आज़माएं"],
+ before:["BEFORE","पहले"],after:["AFTER","बाद में"],beforeAlt:["Everyday photo before","पहले की साधारण फोटो"],afterAlt:["SnapMagic Diwali photoshoot after","SnapMagic दिवाली फोटोशूट के बाद"],
+ q:["Pick a category","कैटेगरी चुनें"],cats:["categories","कैटेगरी"],looks:["looks","लुक"],
+ trending:["TRENDING","ट्रेंडिंग"],business:["BUSINESS","बिज़नेस"],more:["More categories","और कैटेगरी"],
+ free:["free","फ्री"],
+ step1:["Step 1 of 4","स्टेप 1 / 4"],
+ step2:["Step 2 of 4","स्टेप 2 / 4"],pick:["Pick a look","लुक चुनें"],
+ step3:["Step 3 of 4 · Optional","स्टेप 3 / 4 · ज़रूरी नहीं"],step3req:["Step 3 of 4","स्टेप 3 / 4"],
  addPhoto:["Add your photo","अपनी फोटो जोड़ें"],addChild:["Add your child's photo","बच्चे की फोटो जोड़ें"],addGroup:["Add your group photo","ग्रुप फोटो जोड़ें"],addCouple:["Add your photos","अपनी फोटो जोड़ें"],
  useFace:["Use your own face","अपना चेहरा इस्तेमाल करें"],skipNew:["Or skip, and AI will make a new person","या स्किप करें, AI नया चेहरा बनाएगा"],
  childFace:["Use a clear photo of the child","बच्चे की साफ़ फोटो लगाएं"],skipChild:["Or skip, and AI will make a cute new child","या स्किप करें, AI एक प्यारा बच्चा बनाएगा"],
  groupFace:["Use a photo of your family or friends","परिवार या दोस्तों की फोटो लगाएं"],skipGroup:["Or skip, and AI will make a new group","या स्किप करें, AI नया ग्रुप बनाएगा"],
  you:["You","आप"],partner:["Partner","पार्टनर"],
  upload:["Upload photo","फोटो अपलोड करें"],change:["Change photo","फोटो बदलें"],
- tipSolo:["💡 Best results: a clear, front-facing photo of just you, in good light.","💡 बेहतरीन रिज़ल्ट: अच्छी रोशनी में सिर्फ़ आपकी साफ़, सामने से ली गई फोटो।"],
- tipGroup:["💡 Works best with 2–6 people, with every face clearly visible.","💡 2–6 लोगों की फोटो सबसे अच्छी आती है, सबके चेहरे साफ़ दिखने चाहिए।"],
- tipCouple:["💡 Add one clear photo of each person, or just one photo of you both together.","💡 दोनों की एक-एक साफ़ फोटो लगाएं, या दोनों की एक साथ वाली एक फोटो।"],
- kidNote:["👶 Only upload a child's photo if you are their parent or have family permission.","👶 बच्चे की फोटो तभी लगाएं जब आप माता-पिता हों या परिवार की इजाज़त हो।"],
+ tipSolo:["Best results: a clear, front-facing photo of just you, in good light.","बेहतरीन रिज़ल्ट: अच्छी रोशनी में सिर्फ़ आपकी साफ़, सामने से ली गई फोटो।"],
+ tipGroup:["Works best with 2–6 people, with every face clearly visible.","2–6 लोगों की फोटो सबसे अच्छी आती है, सबके चेहरे साफ़ दिखने चाहिए।"],
+ tipCouple:["Add one clear photo of each person, or just one photo of you both together.","दोनों की एक-एक साफ़ फोटो लगाएं, या दोनों की एक साथ वाली एक फोटो।"],
+ kidNote:["Only upload a child's photo if you are their parent or have family permission.","बच्चे की फोटो तभी लगाएं जब आप माता-पिता हों या परिवार की इजाज़त हो।"],
  next:["Next","आगे"],skip:["Skip","स्किप"],
- step4:["Step 4 of 4","स्टेप 4 / 4"],choose:["Choose a style","स्टाइल चुनें"],yourPhoto:["Your photo","आपकी फोटो"],noPhoto:["No photo","फोटो नहीं"],gen:["Generate","बनाएं"],
+ step4:["Step 4 of 4","स्टेप 4 / 4"],choose:["Pick your style","स्टाइल चुनें"],
+ photoReady:["Your photo is ready","आपकी फोटो तैयार है"],photoReadySub:["Auto-brightened for a clear face","साफ़ चेहरे के लिए अपने-आप ब्राइट की गई"],productReadySub:["Your product stays exactly the same","आपका प्रोडक्ट बिल्कुल वैसा ही रहेगा"],
+ noPhoto:["No photo","फोटो नहीं"],noPhotoSub:["AI will create a new face","AI नया चेहरा बनाएगा"],changeShort:["Change","बदलें"],addShort:["Add photo","फोटो जोड़ें"],
+ gen:["Create my image","मेरी फोटो बनाएं"],uses:["Uses 1 of your {n} free images · about 20 seconds","आपकी {n} फ्री फोटो में से 1 इस्तेमाल होगी · लगभग 20 सेकंड"],
  creating:["Creating your image…","आपकी फोटो बन रही है…"],wait:["This takes about 10–20 seconds","इसमें 10–20 सेकंड लगते हैं"],
- done:["Done","तैयार"],cardTitle:["💌 Make it a greeting card","💌 ग्रीटिंग कार्ड बनाएं"],yourName:["Your name","आपका नाम"],bdayName:["Birthday person's name","जिसका जन्मदिन है, उसका नाम"],
- egName:["e.g. Javed & Family","जैसे: जावेद और परिवार"],egBday:["e.g. Aarav","जैसे: आरव"],addCard:["Add card","कार्ड जोड़ें"],update:["Update card","कार्ड बदलें"],
- share:["Share on WhatsApp","व्हाट्सएप पर शेयर करें"],save:["Save image","फोटो सेव करें"],hold:["Tap Save image, then choose \"Save Image\" to put it in your gallery. You can also press and hold the picture.","सेव पर टैप करें, फिर \"Save Image\" चुनें, फोटो गैलरी में आ जाएगी। या फोटो को दबाकर रखें।"],
- regen:["🔄 Generate again","🔄 फिर से बनाएं"],diff:["Try a different style","दूसरा स्टाइल आज़माएं"],over:["Start over","शुरू से करें"],
+ done:["Ready","तैयार"],cardTitle:["Greeting card","ग्रीटिंग कार्ड"],yourName:["Your name","आपका नाम"],bdayName:["Birthday person's name","जिसका जन्मदिन है, उसका नाम"],
+ egName:["e.g. Javed & Family","जैसे: जावेद और परिवार"],egBday:["e.g. Aarav","जैसे: आरव"],update:["Update","बदलें"],noText:["No text","बिना टेक्स्ट"],
+ wa:["WhatsApp","व्हाट्सएप"],share:["Share on WhatsApp","व्हाट्सएप पर शेयर करें"],save:["Save to gallery","गैलरी में सेव करें"],
+ hold:["Tap Save to gallery, then choose \"Save Image\". You can also press and hold the picture.","सेव पर टैप करें, फिर \"Save Image\" चुनें, फोटो गैलरी में आ जाएगी। या फोटो को दबाकर रखें।"],
+ regen:["Make another version","एक और बनाएं"],diff:["Try another style","दूसरा स्टाइल आज़माएं"],over:["Start a new image","नई फोटो बनाएं"],
  fail:["Couldn't make it","फोटो नहीं बन पाई"],tryAgain:["Try again","फिर कोशिश करें"],back:["Back","पीछे"],
  err:["Something went wrong. Please try again.","कुछ गड़बड़ हो गई। कृपया फिर कोशिश करें।"],
  foot:["Images are made by AI. Please only upload photos you have permission to use.","फोटो AI से बनती हैं। सिर्फ़ वही फोटो अपलोड करें जिनकी आपको इजाज़त है।"],
  shareText:["Look what I made with SnapMagic! ✨ Make yours free: ","देखो SnapMagic से मैंने क्या बनाया! ✨ आप भी फ्री में बनाओ: "],
- langBtn:["हिंदी","English"],
+ langBtn:["हिंदी","English"],langAria:["भाषा बदलें: हिंदी","Change language: English"],
  addProduct:["Add your product photo","अपने प्रोडक्ट की फोटो जोड़ें"],productFace:["Use a clear photo of your product","अपने प्रोडक्ट की साफ़ फोटो लगाएं"],productNeed:["A product photo is needed for this","इसके लिए प्रोडक्ट की फोटो ज़रूरी है"],
- tipProduct:["💡 Best results: one product, fully visible, in good light. The AI keeps your product the same and changes only the background.","💡 बेहतरीन रिज़ल्ट: एक ही प्रोडक्ट, पूरा दिखता हुआ, अच्छी रोशनी में। AI आपका प्रोडक्ट वैसा ही रखेगा, सिर्फ़ बैकग्राउंड बदलेगा।"],
+ tipProduct:["Best results: one product, fully visible, in good light. The AI keeps your product the same and changes only the background.","बेहतरीन रिज़ल्ट: एक ही प्रोडक्ट, पूरा दिखता हुआ, अच्छी रोशनी में। AI आपका प्रोडक्ट वैसा ही रखेगा, सिर्फ़ बैकग्राउंड बदलेगा।"],
  shopName:["Your shop name","आपकी दुकान का नाम"],egShop:["e.g. Sharma Sweets","जैसे: शर्मा स्वीट्स"],
- banner:["Make your Diwali card in 1 tap","1 टैप में अपना दिवाली कार्ड बनाएं"],bannerSub:["Add your photo · get a Happy Diwali card to share","अपनी फोटो लगाएं · शेयर करने के लिए दिवाली कार्ड पाएं"],
- limitTitle:["You've used your free images 🎉","आपकी फ्री फोटो खत्म हो गईं 🎉"],
+ limitTitle:["You've used your free images","आपकी फ्री फोटो खत्म हो गईं"],
  limitText:["Thanks for trying SnapMagic! More images are coming soon with our app on the Play Store.","SnapMagic आज़माने के लिए धन्यवाद! जल्द ही Play Store पर ऐप के साथ और फोटो बना सकेंगे।"],
- dailyCap:["Today's free images are finished 🎆 Please come back tomorrow!","आज की फ्री फोटो खत्म हो गईं 🎆 कृपया कल फिर आएं!"],
+ dailyCap:["Today's free images are finished. Please come back tomorrow!","आज की फ्री फोटो खत्म हो गईं। कृपया कल फिर आएं!"],
  left:["free images left","फ्री फोटो बाकी"]
 };
 let lang='en';try{lang=localStorage.getItem('sm_lang')||'en'}catch(e){}
 const L=()=>lang==='hi'?1:0;
 const t=k=>TXT[k][L()];
-const nm=k=>lang==='hi'&&HI[k]?HI[k]:k;
+const nm=k=>lang==='hi'?(HI[k]||k):(EN[k]||k);
 
 const FREE_LIMIT=2; // free images per phone
 const used=()=>{try{return +localStorage.getItem('sm_used')||0}catch(e){return 0}};
 const addUsed=()=>{try{localStorage.setItem('sm_used',used()+1)}catch(e){}};
 if(location.hash==='#owner'){try{localStorage.removeItem('sm_used')}catch(e){}}
 const left=()=>Math.max(0,FREE_LIMIT-used());
-const st={step:0,cat:null,opt:null,photo:null,photo2:null,style:null};
+// view: what is on screen at step 4 ('loading' | 'result' | 'error' | 'limit' | 'cap')
+const st={step:0,cat:null,opt:null,photo:null,photo2:null,style:null,view:null,res:null,errMsg:null};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function tile(key,sub,sel,cols){return `<button class="tile${sel?' sel':''}" data-v="${esc(key)}">${cols?`<span class="sw" style="background:linear-gradient(90deg,${cols[0]},${cols[1]})"></span>`:''}<b>${esc(nm(key))}</b><small>${esc(sub)}</small></button>`}
+
+// Inline stroke icons (no emoji).
+const ICONS={
+ back:'<path d="M15 6l-6 6 6 6"/>',chev:'<path d="M9 6l6 6-6 6"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',check:'<path d="M5 12l5 5 9-10"/>',
+ camera:'<path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/>',
+ share:'<path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/>',down:'<path d="M12 3v12M7 10l5 5 5-5M4 19h16"/>',
+ bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0012 3z"/>',
+ info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',
+ users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 010 6.4M18.5 14.6c1.8.9 3 2.7 3 5.4"/>',
+ box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+ case:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/>',
+ gem:'<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6 3-6"/>',
+ wand:'<path d="M12 4l1.7 4.3L18 10l-4.3 1.7L12 16l-1.7-4.3L6 10l4.3-1.7z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/>',
+ gift:'<rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18M12 9v12M12 9c-2-4-6-3-5-1s5 1 5 1zm0 0c2-4 6-3 5-1s-5 1-5 1z"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+const ic=(n,s=18,w=2.2)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
+const STAR='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.6 6.9L22 9.3l-5.6 4.8L18 21.5 12 17.6 6 21.5l1.6-7.4L2 9.3l7.4-.4z"/></svg>';
+
 function readFile(f,cb){const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(f)}
-function render(){
+function reset(){Object.assign(st,{step:0,cat:null,opt:null,style:null,photo:null,photo2:null,view:null,res:null,errMsg:null});render();window.scrollTo(0,0)}
+
+// Header: logo + free pill on home/result, back + progress on the steps in between.
+function hdr(){
   document.documentElement.lang=lang==='hi'?'hi':'en';
-  $('lang').textContent=t('langBtn');$('back').textContent=t('back');$('foot').textContent=t('foot');
-  [...$('steps').children].forEach((el,i)=>el.classList.toggle('on',i<=Math.min(st.step,4)));
-  $('back').hidden=st.step===0||st.step===4;
+  const mid=st.step>=1&&st.step<=3;
+  $('lang').textContent=t('langBtn');$('lang').setAttribute('aria-label',t('langAria'));
+  $('foot').textContent=t('foot');
+  $('back').hidden=!mid;$('back').innerHTML=ic('back');$('back').setAttribute('aria-label',t('back'));
+  $('logo').hidden=mid;$('pill').hidden=mid;$('steps').hidden=!mid;
+  $('pill').innerHTML=`${STAR}<span aria-hidden="true">${left()} ${t('free')}</span><span class="vh">${left()} ${t('left')}</span>`;
+  [...$('steps').children].forEach((el,i)=>el.classList.toggle('on',i<=Math.min(st.step,3)));
+  $('steps').setAttribute('aria-label',mid?t('step'+(st.step===2?'3req':st.step+1)):'');
+}
+function render(){
+  hdr();
   const s=$('screen');
   if(st.step===0){
-    s.innerHTML=`<div style="display:grid;gap:14px"><button class="banner" id="diwali"><span class="em">🪔</span><span><b>${t('banner')}</b><small>${t('bannerSub')}</small></span></button>
-    <p class="steplabel">${t('step1')} · ${left()} ${t('left')}</p><h1>${t('q')}</h1><div class="grid">${Object.entries(CATS).map(([k,v])=>tile(k,v.opts.map(nm).join(' · '),false,v.c)).join('')}</div></div>`;
-    s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.cat=b.dataset.v;st.opt=null;st.step=1;render()});
-    $('diwali').onclick=()=>{st.cat='Festival';st.opt='Diwali';st.step=2;render()};
+    const nCats=Object.keys(CATS).length,nLooks=Object.values(CATS).reduce((a,c)=>a+c.opts.length,0)*Object.keys(STYLES).length;
+    s.innerHTML=`<section class="hero"><div class="hero-in">
+      <div class="ba">
+        <div class="ph"><img src="${pic('01-before')}" alt="${t('beforeAlt')}" style="object-position:50% 0%"><span class="tag b">${t('before')}</span></div>
+        <div class="ph"><img src="${pic('02-diwali-realistic')}" alt="${t('afterAlt')}" style="object-position:55% 0%"><span class="tag a">${t('after')}</span></div>
+        <span class="arrow">${ic('arrow',18,2.6)}</span>
+      </div>
+      <div class="txt"><span class="eyebrow">${t('eyebrow')}</span>
+        <h1>${t('h1a')} <em>${t('h1b')}</em> ${t('h1c')}</h1>
+        <p>${t('heroSub')}</p></div>
+      <button class="btn" id="diwali">${ic('camera')}${t('cta')}</button>
+    </div></section>
+    <div class="head" id="all"><h2>${t('q')}</h2><span class="sub">${nCats} ${t('cats')} · ${nLooks} ${t('looks')}</span></div>
+    <div class="grid">${Object.entries(PICS).map(([k,p])=>`<button class="pic cat" data-v="${esc(k)}">
+      <img src="${pic(p[0])}" alt="" loading="lazy" style="object-position:${p[1]}">
+      <span class="cap"><b>${esc(nm(k))}</b><small>${esc(p[2+L()])}</small></span>
+      ${p[4]?`<span class="badge${p[4]==='business'?' ivory':''}">${t(p[4])}</span>`:''}</button>`).join('')}</div>
+    <div class="more"><span class="sub">${t('more')}</span>
+    <div class="mini-grid">${Object.entries(MINI).map(([k,i])=>`<button class="mini cat" data-v="${esc(k)}"><span class="ico">${ic(i,18,2)}</span><b>${esc(nm(k))}</b><small>${CATS[k].opts.length} ${t('looks')}</small></button>`).join('')}</div></div>`;
+    s.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{st.cat=b.dataset.v;st.opt=null;st.step=1;render();window.scrollTo(0,0)});
+    $('diwali').onclick=()=>{st.cat='Festival';st.opt='Diwali';st.step=2;render();window.scrollTo(0,0)};
   }else if(st.step===1){
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step2')} · ${esc(nm(st.cat))}</p><h1>${t('pick')}</h1><div class="grid">${CATS[st.cat].opts.map(k=>tile(k,t('tap'),st.opt===k,CATS[st.cat].c)).join('')}</div></div>`;
-    s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.opt=b.dataset.v;st.step=2;render()});
+    const p=PICS[st.cat];
+    s.innerHTML=`<div class="lookhead">${p?`<img src="${pic(p[0])}" alt="" style="object-position:${p[1]}">`:''}
+      <span class="eyebrow">${t('step2')} · ${esc(nm(st.cat))}</span><h1>${t('pick')}</h1></div>
+    <div class="grid" style="gap:10px">${CATS[st.cat].opts.map(k=>`<button class="look${st.opt===k?' sel':''}" data-v="${esc(k)}"><b>${esc(nm(k))}</b>${ic('chev',16)}</button>`).join('')}</div>`;
+    s.querySelectorAll('.look').forEach(b=>b.onclick=()=>{st.opt=b.dataset.v;st.step=2;render();window.scrollTo(0,0)});
   }else if(st.step===2){
     const kids=st.cat==='Kids',group=st.cat==='Group',couple=st.cat==='Couple',prod=st.cat==='Product';
-    const slot=(id,label,img)=>`<div class="drop">${img?`<img src="${img}" alt="">`:''}<b>${label}</b>
-      <label class="btn ghost" for="${id}" style="width:auto;padding:10px 14px">${img?t('change'):t('upload')}</label>
-      <input id="${id}" type="file" accept="image/*" hidden></div>`;
+    const slot=(id,label,img)=>`<div class="drop">${img?`<img src="${img}" alt="">`:`<span class="ico">${ic('user',22,2)}</span>`}<b>${label}</b>
+      <input class="vh" id="${id}" type="file" accept="image/*"><label class="btn ghost" for="${id}">${img?t('change'):t('upload')}</label></div>`;
     let title,area,tip;
     if(couple){
       title=t('addCouple');tip=t('tipCouple');
@@ -179,24 +402,31 @@ function render(){
       title=prod?t('addProduct'):kids?t('addChild'):group?t('addGroup'):t('addPhoto');
       tip=prod?t('tipProduct'):group?t('tipGroup'):t('tipSolo');
       const [a,b]=prod?[t('productFace'),t('productNeed')]:kids?[t('childFace'),t('skipChild')]:group?[t('groupFace'),t('skipGroup')]:[t('useFace'),t('skipNew')];
-      area=`<div class="drop">${st.photo?`<img src="${st.photo}" alt="">`:`<b>${a}</b><small style="color:var(--muted)">${b}</small>`}
-      <label class="btn ghost" for="file" style="width:auto;padding:10px 18px">${st.photo?t('change'):t('upload')}</label>
-      <input id="file" type="file" accept="image/*" hidden></div>`;
+      area=`<div class="drop">${st.photo?`<img src="${st.photo}" alt="">`:`<span class="ico">${ic(prod?'box':group?'users':'camera',24,2)}</span><b>${a}</b><small>${b}</small>`}
+      <input class="vh" id="file" type="file" accept="image/*"><label class="btn ghost" for="file">${st.photo?'':ic('camera',16)}${st.photo?t('change'):t('upload')}</label></div>`;
     }
     const has=st.photo||st.photo2;
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step3')}</p><h1>${title}</h1>${area}
-    <p class="tip">${tip}</p>
-    ${kids?`<p class="note" style="text-align:left">${t('kidNote')}</p>`:''}
-    <button class="btn" id="next" ${prod&&!has?'disabled style="opacity:.45"':''}>${has?t('next'):t('skip')}</button></div>`;
+    s.innerHTML=`<div class="head"><span class="eyebrow">${prod?t('step3req'):t('step3')} · ${esc(nm(st.opt))}</span><h1>${title}</h1></div>${area}
+    <p class="tip">${ic('bulb',18,2)}<span>${tip}</span></p>
+    ${kids?`<p class="tip plain">${ic('info',16,2)}<span>${t('kidNote')}</span></p>`:''}
+    <button class="btn" id="next" ${prod&&!has?'disabled':''}>${has||prod?t('next'):t('skip')}${has?ic('arrow',18,2.4):''}</button>`;
     $('file').onchange=e=>{const f=e.target.files[0];if(f)readFile(f,d=>{st.photo=d;render()})};
     if($('file2'))$('file2').onchange=e=>{const f=e.target.files[0];if(f)readFile(f,d=>{st.photo2=d;render()})};
-    $('next').onclick=()=>{if(prod&&!has)return;st.step=3;render()};
+    // Going forward, the most popular style is picked for you (you can change it).
+    $('next').onclick=()=>{if(prod&&!has)return;if(!st.style)st.style='3D Cartoon';st.step=3;render();window.scrollTo(0,0)};
   }else if(st.step===3){
-    const has=st.photo||st.photo2;
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('step4')}</p><h1>${t('choose')}</h1><div class="grid">${Object.keys(STYLES).map(k=>tile(k,STYLES[k][L()],st.style===k)).join('')}</div>
-    <div class="chips"><span class="chip">${esc(nm(st.cat))}</span><span class="chip">${esc(nm(st.opt))}</span><span class="chip">${has?t('yourPhoto'):t('noPhoto')}</span></div>
-    <button class="btn" id="gen" ${st.style?'':'disabled style="opacity:.45"'}>${t('gen')}</button></div>`;
-    s.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{st.style=b.dataset.v;render()});
+    const has=st.photo||st.photo2,prod=st.cat==='Product';
+    s.innerHTML=`<div class="head"><span class="eyebrow">${t('step4')} · ${esc(nm(st.cat))} · ${esc(nm(st.opt))}</span><h1>${t('choose')}</h1></div>
+    <div class="grid">${Object.keys(STYLES).map((k,i)=>`<button class="style${st.style===k?' sel':''}" data-v="${esc(k)}" aria-pressed="${st.style===k}">
+      <span class="ph"><img src="${pic(STYLE_PICS[k][0])}" alt="" style="object-position:${STYLE_PICS[k][1]}"></span>
+      <b>${esc(nm(k))}</b><small${i===0?' class="pop"':''}>${STYLES[k][L()]}</small><span class="tick">${ic('check',14,3)}</span></button>`).join('')}</div>
+    <div class="ready">${has?`<img src="${st.photo||st.photo2}" alt="">`:`<span class="ico">${ic('user',20,2)}</span>`}
+      <div><b>${has?t('photoReady'):t('noPhoto')}</b><small>${has?(prod?t('productReadySub'):t('photoReadySub')):t('noPhotoSub')}</small></div>
+      <button class="link" id="chg">${has?t('changeShort'):t('addShort')}</button></div>
+    <div class="cta"><button class="btn big" id="gen" ${st.style?'':'disabled'}>${ic('spark',20)}${t('gen')}</button>
+    <span class="note">${t('uses').replace('{n}',left())}</span></div>`;
+    s.querySelectorAll('.style').forEach(b=>b.onclick=()=>{st.style=b.dataset.v;render()});
+    $('chg').onclick=()=>{st.step=2;render();window.scrollTo(0,0)};
     $('gen').onclick=()=>{if(!st.style)return;st.step=4;render()};
   }else{
     generate();
@@ -255,7 +485,8 @@ const WISHES={
 const isBday=o=>o==='Birthday'||o==='Birthday party';
 const CARD_FONT='"Bricolage Grotesque","Hind",system-ui,sans-serif',CARD_FONT2='Manrope,"Hind",system-ui,sans-serif';
 // Draws the wish and name on the picture, like a greeting card.
-async function makeCard(src,wish,name,bday){
+// hi = the wish is the Hindi one, so the "from" line is written in Hindi too.
+async function makeCard(src,wish,name,bday,hi){
   try{await Promise.all([document.fonts.load('800 40px "Bricolage Grotesque"'),document.fonts.load('700 40px Hind','अ')])}catch(e){}
   return new Promise(res=>{const im=new Image();im.onload=()=>{
     const W=im.width,H=im.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
@@ -264,7 +495,7 @@ async function makeCard(src,wish,name,bday){
     x.fillStyle=g;x.fillRect(0,H*0.62,W,H*0.38);
     x.textAlign='center';x.textBaseline='alphabetic';
     let line1=wish,line2='';
-    if(name){line2=bday?name:(lang==='hi'?name+' की ओर से':'from '+name);if(bday)line1=wish+',';}
+    if(name){line2=bday?name:(hi?name+' की ओर से':'from '+name);if(bday)line1=wish+',';}
     let f1=Math.round(W*0.085);x.font=`800 ${f1}px ${CARD_FONT}`;
     while(x.measureText(line1).width>W*0.9&&f1>12){f1-=2;x.font=`800 ${f1}px ${CARD_FONT}`}
     const f2=Math.round(f1*0.55);
@@ -294,59 +525,100 @@ async function shareImage(dataUrl){
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 function limitScreen(msg){
-  const s=$('screen');$('back').hidden=true;
-  s.innerHTML=`<div style="display:grid;gap:14px"><h1>${msg?t('dailyCap'):t('limitTitle')}</h1>${msg?'':`<p style="margin:0;color:var(--muted)">${t('limitText')}</p>`}
+  st.view=msg?'cap':'limit';hdr();
+  $('screen').innerHTML=`<div class="msg"><span class="ico">${ic(msg?'clock':'gift',26,2)}</span><h1>${msg?t('dailyCap'):t('limitTitle')}</h1>${msg?'':`<p>${t('limitText')}</p>`}
   <button class="btn ghost" id="again">${t('over')}</button></div>`;
-  $('again').onclick=()=>{Object.assign(st,{step:0,cat:null,opt:null,style:null,photo:null,photo2:null});render()};
+  $('again').onclick=reset;
+}
+function errorScreen(){
+  st.view='error';hdr();
+  $('screen').innerHTML=`<div class="head"><h1>${t('fail')}</h1></div><div class="err" id="msg" role="alert"></div>
+  <button class="btn" id="same">${t('tryAgain')}</button><button class="link" id="again">${t('over')}</button>`;
+  $('msg').textContent=lang==='hi'?t('err'):(st.errMsg||t('err'));
+  $('again').onclick=reset;
+  $('same').onclick=()=>{st.style=null;st.step=3;render()};
+}
+// Redraws the picture with the chosen wish (or none) and name.
+async function applyCard(){
+  const r=st.res,w=WISHES[st.opt],n=++r.tok;
+  const src=r.wi<0||!w?r.plain:await addLabel(await makeCard(r.base,w[r.wi],r.name,isBday(st.opt),r.wi===1),true);
+  if(st.res!==r||n!==r.tok)return;
+  r.cur=src;const o=$('out');if(o)o.src=src;
+}
+function resultScreen(){
+  st.view='result';hdr();
+  const r=st.res,w=WISHES[st.opt],prod=st.cat==='Product',bd=isBday(st.opt);
+  $('screen').innerHTML=`<div class="head"><span class="okline">${ic('check',14,2.6)}${t('done')}</span><h1>${esc(nm(st.opt))} · ${esc(nm(st.style))}</h1></div>
+  <div class="frame"><img class="result" id="out" alt="${esc(nm(st.opt))} · ${esc(nm(st.style))}"></div>
+  <div class="two">
+    <button class="btn wa" id="share" aria-label="${t('share')}">${ic('share')}${t('wa')}</button>
+    <button class="btn sm" id="save">${ic('down')}${t('save')}</button>
+  </div>
+  <p class="note">${t('hold')}</p>
+  ${w?`<form class="cardbox" id="cardform">
+    <b>${t('cardTitle')}</b>
+    <label for="cardname">${prod?t('shopName'):bd?t('bdayName'):t('yourName')}</label>
+    <div class="row"><input id="cardname" maxlength="32" autocomplete="off" value="${esc(r.draft)}" placeholder="${prod?t('egShop'):bd?t('egBday'):t('egName')}"><button type="submit" id="mkcard">${t('update')}</button></div>
+    <div class="chips" id="wishes">
+      <button type="button" class="chip" data-w="0" lang="en">${esc(w[0])}</button>
+      <button type="button" class="chip" data-w="1" lang="hi">${esc(w[1])}</button>
+      <button type="button" class="chip" data-w="-1">${t('noText')}</button>
+    </div>
+  </form>`:''}
+  <div class="two">
+    <button class="btn ghost" id="regen">${t('regen')}</button>
+    <button class="btn ghost" id="same">${t('diff')}</button>
+  </div>
+  <button class="link" id="again">${t('over')}</button>`;
+  $('out').src=r.cur;
+  $('save').onclick=()=>saveImage(r.cur);
+  $('share').onclick=()=>shareImage(r.cur);
+  $('regen').onclick=()=>generate();
+  $('again').onclick=reset;
+  $('same').onclick=()=>{st.style=null;st.step=3;render();window.scrollTo(0,0)};
+  if(w){
+    const chips=[...document.querySelectorAll('#wishes .chip')];
+    const mark=()=>chips.forEach(c=>c.setAttribute('aria-pressed',String(+c.dataset.w===r.wi)));
+    const read=()=>{r.draft=$('cardname').value;r.name=r.draft.trim()};
+    mark();
+    $('cardname').oninput=()=>{r.draft=$('cardname').value};
+    chips.forEach(c=>c.onclick=()=>{read();r.wi=+c.dataset.w;mark();applyCard()});
+    // Update: puts the name on the card (and adds the wish if none is chosen yet).
+    $('cardform').onsubmit=e=>{e.preventDefault();read();if(r.wi<0)r.wi=L();mark();applyCard()};
+  }
 }
 async function generate(){
   const s=$('screen');
   if(left()<=0)return limitScreen(false);
-  $('back').hidden=true;
-  s.innerHTML=`<div class="loading"><div class="spin"></div>${t('creating')}<br><small>${t('wait')}</small></div>`;
+  st.view='loading';st.res=null;st.errMsg='';hdr();
+  s.innerHTML=`<div class="loading" role="status"><div class="spin"></div><b id="ld1">${t('creating')}</b><span id="ld2">${t('wait')}</span></div>`;
+  window.scrollTo(0,0);
   try{
     const photo=st.photo?await shrink(st.photo):null;
     const photo2=st.cat==='Couple'&&st.photo2?await shrink(st.photo2):null;
     const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cat:st.cat,opt:st.opt,style:st.style,photo:photo||photo2,photo2:photo&&photo2?photo2:null})});
     const j=await r.json().catch(()=>({}));
     if(r.status===429)return limitScreen(true);
-    if(!r.ok||!j.image)throw new Error(lang==='hi'?t('err'):(j.error||t('err')));
+    if(!r.ok||!j.image){st.errMsg=j.error||'';throw new Error(st.errMsg)}
     addUsed();
-    const base=j.image;let cur=await addLabel(base);
-    const w=WISHES[st.opt],wish=w&&w[L()];
-    s.innerHTML=`<div style="display:grid;gap:14px"><p class="steplabel">${t('done')}</p><h1>${esc(nm(st.opt))} · ${esc(nm(st.style))}</h1>
-    <img class="result" id="out" alt="">
-    ${wish?`<div class="card">
-      <b>${t('cardTitle')}</b>
-      <label for="cardname" class="note" style="text-align:left">${st.cat==='Product'?t('shopName'):isBday(st.opt)?t('bdayName'):t('yourName')}</label>
-      <input id="cardname" maxlength="32" placeholder="${st.cat==='Product'?t('egShop'):isBday(st.opt)?t('egBday'):t('egName')}">
-      <button class="btn" id="mkcard">${t('addCard')}: "${wish}"</button>
-    </div>`:''}
-    <button class="btn wa" id="share">${t('share')}</button>
-    <button class="btn ghost" id="save">${t('save')}</button>
-    <p class="note">${t('hold')}</p>
-    <button class="btn ghost" id="regen">${t('regen')}</button>
-    <button class="btn ghost" id="same">${t('diff')}</button>
-    <button class="btn ghost" id="again">${t('over')}</button></div>`;
-    const show=src=>{cur=src;$('out').src=src};
-    $('save').onclick=()=>saveImage(cur);
-    show(cur);
-    $('share').onclick=()=>shareImage(cur);
-    $('regen').onclick=()=>generate();
-    if(wish)$('mkcard').onclick=async()=>{
-      const name=$('cardname').value.trim();
-      show(await addLabel(await makeCard(base,wish,name,isBday(st.opt)),true));
-      $('mkcard').textContent=t('update');
-    };
+    const plain=await addLabel(j.image);
+    st.res={base:j.image,plain,cur:plain,wi:-1,name:'',draft:'',tok:0};
+    resultScreen();
   }catch(e){
-    s.innerHTML=`<div style="display:grid;gap:14px"><h1>${t('fail')}</h1><div class="err" id="msg"></div>
-    <button class="btn" id="same">${t('tryAgain')}</button><button class="btn ghost" id="again">${t('over')}</button></div>`;
-    $('msg').textContent=e.message;
+    errorScreen();
   }
-  $('again').onclick=()=>{Object.assign(st,{step:0,cat:null,opt:null,style:null,photo:null,photo2:null});render()};
-  $('same').onclick=()=>{st.style=null;st.step=3;render()};
 }
-$('back').onclick=()=>{st.step=Math.max(0,st.step-1);render()};
-$('lang').onclick=()=>{lang=lang==='hi'?'en':'hi';try{localStorage.setItem('sm_lang',lang)}catch(e){}if(st.step<4)render();else{ /* keep result on screen */ $('lang').textContent=t('langBtn');$('foot').textContent=t('foot');}};
+$('back').onclick=()=>{st.step=Math.max(0,st.step-1);render();window.scrollTo(0,0)};
+$('lang').onclick=()=>{
+  lang=lang==='hi'?'en':'hi';try{localStorage.setItem('sm_lang',lang)}catch(e){}
+  if(st.step<4)return render();
+  // Step 4: keep the picture, only redraw the words around it.
+  if(st.view==='result')resultScreen();
+  else if(st.view==='error')errorScreen();
+  else if(st.view==='limit'||st.view==='cap')limitScreen(st.view==='cap');
+  else{hdr();if($('ld1')){$('ld1').textContent=t('creating');$('ld2').textContent=t('wait')}}
+};
 render();
 </script>
+</body>
+</html>
